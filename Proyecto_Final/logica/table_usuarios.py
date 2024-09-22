@@ -74,7 +74,71 @@ def obtener_usuario(id: int):
         cursor.close()
         connection.close()
 
+def obtener_tipo_user(user: str):
+    connection = get_connection()
+    cursor = connection.cursor()
+    try:
+        # Consulta para buscar el usuario por su ID
+        sql = """
+        SELECT NIVEL 
+        FROM USUARIO 
+        WHERE USERNAME = :1
+        """
+        cursor.execute(sql, (user,))  # Asegúrate de que esto sea una tupla
 
+        usuario = cursor.fetchone()
+
+        if usuario is None:
+            print(f"No se encontró ningún usuario con el USERNAME {user}.")
+            return None
+        else:
+            # Devuelve los valores específicos (USERNAME y PASSWORD)
+            usuario_data = {
+                "tipo": usuario[0],  # Primer valor es tipo de usuario
+            }
+            print("Usuario encontrado: Tipo de Usuario={usuario_data['tipo']")
+            return usuario_data
+
+    except Exception as e:
+        print(f"Ocurrió un error al buscar el usuario: {str(e)}")
+
+    finally:
+        cursor.close()
+        connection.close()
+
+def obtener_usuario_user(user: str):
+    connection = get_connection()
+    cursor = connection.cursor()
+    try:
+        # Consulta para buscar el usuario por su ID
+        sql = """
+        SELECT USERNAME, PASSWORD 
+        FROM USUARIO 
+        WHERE USERNAME = :1
+        """
+        cursor.execute(sql, (user,))  # Asegúrate de que esto sea una tupla
+
+        usuario = cursor.fetchone()
+
+        if usuario is None:
+            print(f"No se encontró ningún usuario con el USERNAME {user}.")
+            return None
+        else:
+            # Devuelve los valores específicos (USERNAME y PASSWORD)
+            usuario_data = {
+                "username": usuario[0],  # Primer valor es USERNAME
+                "password": usuario[1]   # Segundo valor es PASSWORD
+            }
+            print(f"Usuario encontrado: Username={usuario_data['username']}, Password={usuario_data['password']}")
+            return usuario_data
+
+    except Exception as e:
+        print(f"Ocurrió un error al buscar el usuario: {str(e)}")
+
+    finally:
+        cursor.close()
+        connection.close()
+        
 def update_usuario(user_id, username, password, nivel : str):
     if nivel not in niveles:
         print("Nivel no valido")
