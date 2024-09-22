@@ -1,4 +1,9 @@
 import oracledb
+
+#Importacion de ventana de login
+import interfaces.GUI_Login as login
+
+#Importacion de logica de bd
 import logica.table_ingreso as ingreso
 import logica.table_empleados as empleados
 import logica.table_pagos as pagos
@@ -6,7 +11,13 @@ import logica.table_prestamos as prestamos
 import logica.table_solicitud as solicitudes
 import logica.table_sucursales as sucursales
 import logica.table_usuarios as usuarios
+
 from datetime import datetime
+
+ventana_login = login.Login()
+
+
+
 
 def get_connection():
     try:
@@ -55,7 +66,7 @@ def funciones_solicitud():
 def funciones_pago():
     pagos.registrar_pago(8, 1, datetime.now(), 750000)
 
-funciones_pago()
+#funciones_pago()
 #funciones_solicitud()
 #funciones_empleados()
 #funciones_ingresos()    
