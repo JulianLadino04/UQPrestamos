@@ -51,11 +51,12 @@ def funciones_solicitud():
     # solicitudes.eliminar_solicitud(5)
     # solicitudes.mostrar_solicitudes()
     solicitudes.actualizar_solicitud(8, "aprobada")
-
+    
 def funciones_pago():
-    pagos.registrar_pago()
+    pagos.registrar_pago(8, 1, datetime.now(), 750000)
 
-funciones_solicitud()
+funciones_pago()
+#funciones_solicitud()
 #funciones_empleados()
 #funciones_ingresos()    
 #funciones_sucursal()

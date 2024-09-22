@@ -22,7 +22,7 @@ def registrar_pago(numero_prestamo, numero_pago, fecha_pago, valor):
         else:
             moroso = 'N'
         
-        sql = '''INSERT INTO PAGO (NUMERO_PRESTAMO, NUMERO_PAGO, FECHA_PAGO, VALOR, MOROSO) 
+        sql = '''INSERT INTO PAGO (ID_PRESTAMO, NUMERO_CUOTA, FECHA_PAGO, VALOR_PAGO, MOROSO) 
                  VALUES (:1, :2, :3, :4, :5)'''
         cursor.execute(sql, (numero_prestamo, numero_pago, fecha_pago, valor, moroso))
         connection.commit()
@@ -43,6 +43,28 @@ def leer_pagos():
             print(pago)
     except Exception as e:
         print(f"Error al leer pagos: {e}")
+    finally:
+        cursor.close()
+        connection.close()
+
+def mostrar_morosos():
+    connection = get_connection()
+    cursor = connection.cursor()
+    try:
+        sql = '''SELECT NUMERO_PRESTAMO, NUMERO_PAGO, FECHA_PAGO, VALOR 
+                 FROM PAGO 
+                 WHERE MOROSO = 'Y' '''
+        cursor.execute(sql)
+        morosos = cursor.fetchall()
+        
+        if morosos:
+            print("Pagos morosos:")
+            for pago in morosos:
+                print(pago)
+        else:
+            print("No hay pagos morosos.")
+    except Exception as e:
+        print(f"Error al mostrar los morosos: {e}")
     finally:
         cursor.close()
         connection.close()
