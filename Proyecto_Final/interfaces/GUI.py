@@ -33,15 +33,17 @@ ctk.set_default_color_theme("blue")
 
 class Login:
     def __init__(self):
+        print(carpeta_principal)
+        print(carpeta_imagenes)
         self.root = ctk.CTk()
         self.root.title("Proyecto Final Bases de Datos")
-        self.root.iconbitmap(os.path.join(carpeta_imagenes, "logo.ico"))
+        print(self.root.iconbitmap(os.path.join(carpeta_imagenes, "registrar.ico")))
         self.root.geometry("750x450")
         self.root.resizable(False, False)
 
         logo = ctk.CTkImage(
-            light_image=Image.open(os.path.join(carpeta_imagenes, "logo.png")),
-            dark_image=Image.open(os.path.join(carpeta_imagenes, "logo.png")),
+            light_image=Image.open(os.path.join(carpeta_imagenes, "registrar.png")),
+            dark_image=Image.open(os.path.join(carpeta_imagenes, "registrar.png")),
             size=(200, 200)
         )
 
@@ -50,7 +52,6 @@ class Login:
 
         ctk.CTkLabel(self.root, text="Usuario").pack()
         self.usuario = ctk.CTkEntry(self.root)
-        self.usuario.insert(0, "Ej: Laura")
         self.usuario.bind("<Button-1>", lambda e: self.usuario.delete(0, "end"))
         self.usuario.pack()
 
@@ -227,10 +228,3 @@ class Opciones:
             )
             button.grid(row=2 + contador // 3, column=contador % 3, padx=10, pady=10, sticky="nsew")
             self.root.grid_columnconfigure(contador % 3, weight=1)
-
-# ------------- CLASES EMPLEADOS ------------------- #
-
-# ------------- CLASES PARAMETRICOS ------------------- #    
-  
-# ------------- CLASES PRINCIPAL ------------------- #       
-  

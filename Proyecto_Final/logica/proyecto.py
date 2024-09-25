@@ -1,6 +1,6 @@
+import customtkinter as ctk
+import os
 import oracledb
-
-#Importacion de logica de bd
 import logica.table_ingreso as ingreso
 import logica.table_empleados as empleados
 import logica.table_pagos as pagos
@@ -8,8 +8,20 @@ import logica.table_prestamos as prestamos
 import logica.table_solicitud as solicitudes
 import logica.table_sucursales as sucursales
 import logica.table_usuarios as usuarios
+import logica.table_nivel as niveles
+import logica.table_cargo as cargos
+import logica.table_estado as estados
+import logica.table_periodo as periodos
 
+
+
+from tkinter import Image
 from datetime import datetime
+
+
+carpeta_principal = os.path.dirname(__file__)
+carpeta_imagenes = os.path.join(carpeta_principal, "imagenes")
+
 
 def conexion_oracle():
     try:
@@ -45,7 +57,31 @@ def obtener_tipo_usuario(usuario: str):
         return None
     else:
         return usuario_ingresado['tipo']
+
+def id_sucursales():
     
+    ids = sucursales.get_ids_sucursales()
+    if ids is None:
+        return ["No hay sucursales aun"]
+    else:
+        return ids
+
+def enviar_niveles():
+    niveles_sistema = niveles.obtener_niveles()
+    
+    if niveles_sistema is None:
+        print("No hay niveles registrados en la BD")
+    else:
+        return niveles_sistema
+     
+def enviar_cargos():
+    cargos_sistema = cargos.retornar_nombres_cargos()
+    
+    if cargos_sistema is None:
+        print("No hay cargos registrados en el sistema")
+    else:
+        return cargos_sistema
+
 def funciones_usuario():
     usuarios.create_usuario("nestor_castelblanco", "0000", "Principal")
     # usuarios.create_usuario("NCF", "0000", "Principal")
@@ -90,3 +126,30 @@ def funciones_pago():
 #funciones_sucursal()
 #funciones_auditoria()
 ##funciones_usuario()asd
+
+import os
+from PIL import Image  # Asegúrate de que Image sea importado desde PIL
+import customtkinter as ctk
+
+carpeta_principal = os.path.dirname(__file__)
+carpeta_imagenes = os.path.join(carpeta_principal, "imagenes")
+
+def enviar_imagen(nombre_imagen: str):
+    # print(carpeta_principal)
+    # print(carpeta_imagenes)
+    
+    # # Construir la ruta de la imagen usando f-string
+    # image_path = os.path.join(carpeta_imagenes, f"{nombre_imagen}.png")
+    
+    # logo = ctk.CTkImage(
+    #     light_image=Image.open(image_path),
+    #     dark_image=Image.open(image_path),
+    #     size=(200, 200)
+    # )
+    # return logo  # Retorna la imagen
+    print(os.path.join(carpeta_imagenes, nombre_imagen+".png"))
+    return os.path.join(carpeta_imagenes, nombre_imagen+".png")
+
+if __name__ == "__main__":
+    # Llamar a la función para probar
+    enviar_imagen("registro")

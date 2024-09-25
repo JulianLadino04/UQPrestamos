@@ -116,3 +116,30 @@ def get_last_sucursal_id():
     finally:
         cursor.close()
         connection.close()
+
+def get_ids_sucursales():
+    connection = get_connection()  # Asumiendo que esta función devuelve una conexión válida
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT ID_SUCURSAL 
+            FROM SUCURSAL 
+            ORDER BY ID_SUCURSAL ASC
+        """)
+
+        ids = cursor.fetchall()  # Obtener todos los resultados
+
+        if ids:
+            # Retornar una lista con solo los valores de los IDs
+            return [id_sucursal[0] for id_sucursal in ids]
+        else:
+            return []
+
+    except Exception as e:
+        print(f"Ocurrió un error al obtener los IDs de sucursales: {str(e)}")
+        return []
+
+    finally:
+        cursor.close()
+        connection.close()

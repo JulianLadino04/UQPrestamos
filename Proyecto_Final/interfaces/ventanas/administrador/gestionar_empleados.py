@@ -4,7 +4,8 @@ import logica.proyecto as proyecto
 from PIL import Image
 from tkinter import ttk
 import tkinter as tk
-    
+import interfaces.ventanas.administrador.registrar_empleado as reg
+
 class gestionar_empleados:
     def __init__(self):
         self.root = ctk.CTk()
@@ -55,6 +56,7 @@ class gestionar_empleados:
 
         # Añadir un botón para interactuar con las filas seleccionadas
         ctk.CTkButton(self.root, text="Seleccionar Empleado", command=self.obtener_seleccion).pack(pady=10)
+        ctk.CTkButton(self.root, text="Crear Empleado", command=self.ventana_creacion).pack(pady=10)
 
         self.root.mainloop()
 
@@ -65,3 +67,7 @@ class gestionar_empleados:
             print(f"Fila seleccionada: {fila}")
         else:
             print("No se ha seleccionado ninguna fila")   
+
+    def ventana_creacion(self):
+        ingresar_ventana_creacion_empleado = reg.RegistrarEmpleados()
+        ingresar_ventana_creacion_empleado.root.mainloop()   
