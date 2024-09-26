@@ -18,32 +18,34 @@ def get_connection():
 
 
 ## ------------ USUARIOS --------------- ##
-
-def create_usuario(username, password, nivel):
-    connection = get_connection()
+def create_usuario(identificacion, nombre, username, password, nivel):
+    connection = get_connection()  # Asumo que ya tienes este método implementado
     cursor = connection.cursor()
-     
-    id = get_last_usuario_id() + 1
     
-    if nivel in niveles:
-        try:
-            # Verificar si el username ya existe
-            cursor.execute("SELECT COUNT(*) FROM USUARIO WHERE USERNAME = :1", (username,))
-            if cursor.fetchone()[0] > 0:
-                print("El nombre de usuario ya existe. Elija otro.")
-                return
+    try:
+        # Verificar si el ID_USUARIO ya existe
+        cursor.execute("SELECT COUNT(*) FROM USUARIO WHERE ID_USUARIO = :1", (identificacion,))
+        if cursor.fetchone()[0] > 0:
+            print("El ID de usuario ya existe. Elija otro.")
+            return
 
-            sql = "INSERT INTO USUARIO (ID_USUARIO, USERNAME, PASSWORD, NIVEL) VALUES (:1, :2, :3, :4)"
-            cursor.execute(sql, (id, username, password, nivel))  # Asegúrate de que esto sea una tupla
-            connection.commit()
-            print("Usuario creado correctamente")
-        except Exception as e:
-            print(f"Error al crear el usuario: {e}")
-        finally:
-            cursor.close()
-            connection.close()
-    else:
-        print("El nivel ingresado es inválido")
+        # Verificar si el username ya existe
+        cursor.execute("SELECT COUNT(*) FROM USUARIO WHERE USERNAME = :1", (username,))
+        if cursor.fetchone()[0] > 0:
+            print("El nombre de usuario ya existe. Elija otro.")
+            return
+        
+        sql = "INSERT INTO USUARIO (ID_USUARIO, USERNAME, PASSWORD, NIVEL, NOMBRE) VALUES (:1, :2, :3, :4, :5)"
+        cursor.execute(sql, (identificacion, username, password, nivel, nombre))  # Ahora la tupla es correcta
+        connection.commit()
+        print("Usuario creado correctamente")
+            
+    except Exception as e:
+        print(f"Error al crear el usuario: {e}")
+    finally:
+        cursor.close()
+        connection.close()
+
 
 def obtener_usuario(id: int):
     connection = get_connection()
@@ -105,32 +107,35 @@ def obtener_tipo_user(user: str):
     finally:
         cursor.close()
         connection.close()
-
-def obtener_usuario_user(user: str):
+def obtener_usuario_user(user: str, contrasena: str):
     connection = get_connection()
     cursor = connection.cursor()
     try:
-        # Consulta para buscar el usuario por su ID
+        # Consulta para buscar el usuario por su USERNAME
         sql = """
-        SELECT USERNAME, PASSWORD 
-        FROM USUARIO 
+        SELECT USERNAME, PASSWORD, USUARIO
+        FROM CREDENCIALES 
         WHERE USERNAME = :1
         """
         cursor.execute(sql, (user,))  # Asegúrate de que esto sea una tupla
 
-        usuario = cursor.fetchone()
+        # Obtener la fila completa de resultados
+        fila = cursor.fetchone()
 
-        if usuario is None:
+        if fila is None:
             print(f"No se encontró ningún usuario con el USERNAME {user}.")
             return None
+
+        # Desempaquetar los resultados
+        usuario, password, id_usuario = fila
+
+        # Verificar las credenciales
+        if usuario == user and contrasena == password:
+            print(f"Se encontró el usuario con el USERNAME {user}.")
+            return id_usuario
         else:
-            # Devuelve los valores específicos (USERNAME y PASSWORD)
-            usuario_data = {
-                "username": usuario[0],  # Primer valor es USERNAME
-                "password": usuario[1]   # Segundo valor es PASSWORD
-            }
-            print(f"Usuario encontrado: Username={usuario_data['username']}, Password={usuario_data['password']}")
-            return usuario_data
+            print(f"Credenciales incorrectas.")
+            return None
 
     except Exception as e:
         print(f"Ocurrió un error al buscar el usuario: {str(e)}")
@@ -138,7 +143,7 @@ def obtener_usuario_user(user: str):
     finally:
         cursor.close()
         connection.close()
-        
+    
 def update_usuario(user_id, username, password, nivel : str):
     if nivel not in niveles:
         print("Nivel no valido")

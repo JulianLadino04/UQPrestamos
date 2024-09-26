@@ -4,6 +4,7 @@ import logica.proyecto as proyecto
 from PIL import Image
 from tkinter import ttk
 import tkinter as tk
+import interfaces.ventanas.administrador.registrar_usuario as regUS
    
 class gestionar_usuarios:
     def __init__(self):
@@ -54,9 +55,13 @@ class gestionar_usuarios:
         self.tree.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
 
         # Añadir un botón para interactuar con las filas seleccionadas
-        ctk.CTkButton(self.root, text="Seleccionar Empleado", command=self.obtener_seleccion).pack(pady=10)
-
+        ctk.CTkButton(self.root, text="Seleccionar Usuario", command=self.obtener_seleccion).pack(pady=10)
+        ctk.CTkButton(self.root, text="Crear Usuario", command=self.ventana_creacion).pack(pady=10)
         self.root.mainloop()
+
+    def ventana_creacion(self):
+        ingresar_ventana_creacion_usuario = regUS.RegistrarUsuarios()
+        ingresar_ventana_creacion_usuario.root.mainloop()   
 
     def obtener_seleccion(self):
         selected_item = self.tree.selection()

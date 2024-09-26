@@ -1,3 +1,4 @@
+from datetime import datetime
 import customtkinter as ctk
 import os
 import logica.proyecto as proyecto
@@ -68,21 +69,30 @@ class Login:
     def validar_login(self):
         usuario = self.usuario.get()
         contrasena = self.contrasena.get()
-        if proyecto.verificar_credenciales(usuario, contrasena):
+
+        id_usuario_sesion = proyecto.verificar_credenciales(usuario, contrasena)
+        
+        if id_usuario_sesion is None:  # Asegúrate de usar 'id_usuario_sesion'
+            if hasattr(self, "info_login"):
+                self.info_login.destroy()
+            self.info_login = ctk.CTkLabel(self.root, text="Credenciales incorrectas")
+            self.info_login.pack()
+        else:
+                        
             if hasattr(self, "info_login"):
                 self.info_login.destroy()
             self.info_login = ctk.CTkLabel(self.root, text="Usuario encontrado")
+
+            proyecto.almacenar_usuario_sistema(id_usuario_sesion)
+            proyecto.hora_ingreso_usuario()
+
             self.info_login.pack()
             # Cerrar la ventana de login
             self.root.destroy()
             tipo_usuario = proyecto.obtener_tipo_usuario(usuario)
             # Iniciar la ventana de opciones
             Opciones(tipo_usuario)
-        else:
-            if hasattr(self, "info_login"):
-                self.info_login.destroy()
-            self.info_login = ctk.CTkLabel(self.root, text="Credenciales incorrectas")
-            self.info_login.pack()
+
 
 #FUNCIONES BOTONES USUARIO PARAMETRICOS
 def gestionar_solicitud_parametrico():
@@ -218,6 +228,7 @@ class Opciones:
             "Principal": funciones_botones_administrador
         }.get(tipo, [])
 
+        # Crear botones de funciones
         for contador, (texto_boton, funcion) in enumerate(zip(botones, funciones)):
             button = ctk.CTkButton(
                 master=self.root,
@@ -228,3 +239,19 @@ class Opciones:
             )
             button.grid(row=2 + contador // 3, column=contador % 3, padx=10, pady=10, sticky="nsew")
             self.root.grid_columnconfigure(contador % 3, weight=1)
+
+        # Crear el botón "Salir" para volver al login
+        salir_button = ctk.CTkButton(
+            master=self.root,
+            text="Salir",
+            height=40,
+            width=200,
+            command=self.volver_al_login  # Llama a la función que regresa al login
+        )
+        # Ubicar el botón "Salir" en una nueva fila
+        salir_button.grid(row=2 + len(botones) // 3, column=1, padx=10, pady=20, sticky="nsew")
+
+    def volver_al_login(self):
+        proyecto.hora_salida_usuario()
+        self.root.destroy()  # Cierra la ventana actual
+        Login()  # Vuelve a abrir la ventana de login

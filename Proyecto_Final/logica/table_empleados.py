@@ -15,24 +15,31 @@ def get_connection():
 
 ## ----------- EMPLEADO ----------- ##
 
-def crear_empleado(ID_EMPLEADO, nombre, cargo, salario, id_sucursal):
+def crear_empleado(ID_EMPLEADO, nombre, cargo, salario, id_sucursal, nivel, usuario, contrasena):
     connection = get_connection()
     cursor = connection.cursor()
     try:
+        
+        cursor.execute("SELECT COUNT(*) FROM CREDENCIALES WHERE USERNAME = :1 ", (usuario,) )
+        if cursor.fetchone()[0] > 0:
+            print ("El usuario ingresado ya esta en uso, utilice otro")
+            return
+        
         # Verificar si la identificación ya existe
         cursor.execute("SELECT COUNT(*) FROM Empleado WHERE ID_EMPLEADO = :1", (ID_EMPLEADO,))
         if cursor.fetchone()[0] > 0:
             print("La identificación ya existe. Elija otra.")
             return
 
-        # Verificar si el cargo es válido
-        if cargo not in ["Operario", "Administrativo", "Ejecutivo"]:
-            print("El cargo no es válido. Debe ser uno de los siguientes: Operario, Administrativo, Ejecutivo.")
-            return
-
-        sql = '''INSERT INTO Empleado (ID_EMPLEADO, nombre, cargo, salario, id_sucursal) 
-                 VALUES (:1, :2, :3, :4, :5)'''
-        cursor.execute(sql, (ID_EMPLEADO, nombre, cargo, salario, id_sucursal))
+        sql = '''INSERT INTO Empleado (ID_EMPLEADO, nombre, cargo, salario, id_sucursal,NIVEL_SISTEMA) 
+                 VALUES (:1, :2, :3, :4, :5, :6)'''
+        cursor.execute(sql, (ID_EMPLEADO, nombre, cargo, salario, id_sucursal, nivel))
+        
+        
+        sql = '''INSERT INTO CREDENCIALES (USERNAME, PASSWORD, USUARIO) 
+                 VALUES (:1, :2, :3)'''
+        cursor.execute(sql, (usuario, contrasena, ID_EMPLEADO))
+        
         connection.commit()
         print(f"Empleado '{nombre}' creado correctamente.")
     except Exception as e:

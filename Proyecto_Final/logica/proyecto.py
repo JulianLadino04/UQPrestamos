@@ -13,8 +13,7 @@ import logica.table_cargo as cargos
 import logica.table_estado as estados
 import logica.table_periodo as periodos
 
-
-
+usuario_sistema = []
 from tkinter import Image
 from datetime import datetime
 
@@ -36,17 +35,13 @@ def conexion_oracle():
 
 def verificar_credenciales(usuario: str, contrasena: str):
     # Obtener el usuario desde la base de datos
-    usuario_ingresado = usuarios.obtener_usuario_user(usuario)
+    usuario_ingresado = usuarios.obtener_usuario_user(usuario, contrasena)
     
     # Verificar si el usuario existe
     if usuario_ingresado is None:
-        return False
+        return None
     else:
-        # Comparar usuario y contraseña ingresados
-        if usuario_ingresado['username'] == usuario and usuario_ingresado['password'] == contrasena:
-            return True
-        else:
-            return False
+        return usuario_ingresado
         
 def obtener_tipo_usuario(usuario: str):
     # Obtener el usuario desde la base de datos
@@ -150,6 +145,25 @@ def enviar_imagen(nombre_imagen: str):
     print(os.path.join(carpeta_imagenes, nombre_imagen+".png"))
     return os.path.join(carpeta_imagenes, nombre_imagen+".png")
 
-if __name__ == "__main__":
-    # Llamar a la función para probar
-    enviar_imagen("registro")
+def crear_empleado(identificacion, nombre, cargo, salario, sucursal, nivel, usuario, contrasena):
+    empleados.crear_empleado(identificacion,nombre,cargo, salario, sucursal, nivel, usuario, contrasena)
+    
+
+def crear_usuario(identificacion, nombre, usuario, contrasena, nivel):
+    usuarios.create_usuario(identificacion,nombre, usuario, contrasena, nivel)
+
+def almacenar_usuario_sistema(id_usuario):
+    usuario_sistema.append(id_usuario)
+    
+def hora_ingreso_usuario():
+    usuario_sistema.append(datetime.now())
+    
+def hora_salida_usuario():
+    usuario_sistema.append(datetime.now())
+    ingresar_ingreso_sistema()
+    
+def ingresar_ingreso_sistema():
+    id_usuario_sistema = usuario_sistema[0]
+    hora_ingreso = usuario_sistema[1]
+    hora_salida = usuario_sistema[2]
+    ingreso.create_ingreso(id_usuario_sistema, hora_ingreso, hora_salida)
