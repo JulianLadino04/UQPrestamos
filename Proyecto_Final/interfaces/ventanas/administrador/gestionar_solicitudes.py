@@ -10,7 +10,7 @@ class gestionar_solicitudes:
     def __init__(self):
         self.root = ctk.CTk()
         self.root.title("Solicitudes")
-        self.root.geometry("750x450")
+        self.root.geometry("750x550")
         self.root.resizable(True, True)
 
         ctk.CTkLabel(master=self.root, text="Vista de solicitudes del Sistema", font=("Roboto", 36)).pack(pady=15)
@@ -54,8 +54,15 @@ class gestionar_solicitudes:
         # Empaquetar la tabla
         self.tree.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
 
-        # Añadir un botón para interactuar con las filas seleccionadas
-        ctk.CTkButton(self.root, text="Seleccionar Empleado", command=self.obtener_seleccion).pack(pady=10)
+        # Crear un marco (frame) para organizar los botones en fila
+        botones_frame = ctk.CTkFrame(self.root)
+        botones_frame.pack(pady=10)
+
+        # Añadir los botones alineados en fila utilizando grid
+        ctk.CTkButton(botones_frame, text="Editar Solicitud", command=self.obtener_seleccion).grid(row=0, column=0, padx=10)
+        ctk.CTkButton(botones_frame, text="Eliminar Solicitud", command=self.obtener_seleccion).grid(row=0, column=1, padx=10)
+        ctk.CTkButton(botones_frame, text="Crear Solicitud", command=self.obtener_seleccion).grid(row=0, column=2, padx=10)
+
         # Botón para ir a la ventana de opciones
         ctk.CTkButton(self.root, text="Ir a Opciones", command=self.ir_a_opciones).pack(pady=10)
 

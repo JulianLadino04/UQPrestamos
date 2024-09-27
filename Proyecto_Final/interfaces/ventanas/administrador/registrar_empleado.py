@@ -22,7 +22,7 @@ class RegistrarEmpleados:
         # Crear la ventana principal
         self.root = ctk.CTk()
         self.root.title("Registro Empleados")
-        self.root.geometry("750x450")
+        self.root.geometry("750x550")
         self.root.resizable(False, False)
         
         # Frame para los campos
@@ -63,7 +63,7 @@ class RegistrarEmpleados:
         ctk.CTkLabel(form_frame, text="Contraseña", font=("Roboto", 18)).grid(row=3, column=2, padx=10, pady=6, sticky="e")
         self.contrasena = ctk.CTkEntry(form_frame, width=140, show="*")
         self.contrasena.grid(row=3, column=3, padx=10, pady=6, sticky="w")
-
+        
         # Botón para registrar empleado
         ctk.CTkButton(self.root, text="Registrar Empleado", command=self.validar_campos).pack(pady=20)
         

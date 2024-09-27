@@ -191,7 +191,7 @@ class Opciones:
         self.root = ctk.CTk()
         self.root.title("Opciones")
         self.root.iconbitmap(os.path.join(carpeta_imagenes, "logo.ico"))
-        self.root.geometry("750x450")
+        self.root.geometry("750x550")
 
         self.root.grid_rowconfigure(0, weight=1)
         self.root.grid_rowconfigure(1, weight=1)
