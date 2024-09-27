@@ -1,7 +1,7 @@
 import customtkinter as ctk
 import os
+import interfaces.GUI as ventana_principal
 import logica.proyecto as proyecto
-from PIL import Image
 from tkinter import ttk
 import tkinter as tk
 import interfaces.ventanas.administrador.registrar_empleado as reg
@@ -58,6 +58,9 @@ class gestionar_empleados:
         ctk.CTkButton(self.root, text="Seleccionar Empleado", command=self.obtener_seleccion).pack(pady=10)
         ctk.CTkButton(self.root, text="Crear Empleado", command=self.ventana_creacion).pack(pady=10)
 
+        # Botón para ir a la ventana de opciones
+        ctk.CTkButton(self.root, text="Ir a Opciones", command=self.ir_a_opciones).pack(pady=10)
+
         self.root.mainloop()
 
     def obtener_seleccion(self):
@@ -70,4 +73,15 @@ class gestionar_empleados:
 
     def ventana_creacion(self):
         ingresar_ventana_creacion_empleado = reg.RegistrarEmpleados()
-        ingresar_ventana_creacion_empleado.root.mainloop()   
+        ingresar_ventana_creacion_empleado.root.mainloop()
+
+    def ir_a_opciones(self):
+        """Cerrar la ventana actual y abrir la ventana de opciones."""
+        self.root.destroy()  # Cierra la ventana de gestión de empleados
+        tipo_usuario = proyecto.retornar_tipo_usuario() + ""
+        ventana_principal.Opciones(tipo_usuario)  # Llama a la ventana de opciones
+        
+    # Método de ejemplo para volver al menú principal
+    def volver_principal(self):
+        self.root.destroy()  # Cierra la ventana actual
+        gestionar_empleados()

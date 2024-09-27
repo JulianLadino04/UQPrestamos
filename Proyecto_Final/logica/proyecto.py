@@ -167,3 +167,7 @@ def ingresar_ingreso_sistema():
     hora_ingreso = usuario_sistema[1]
     hora_salida = usuario_sistema[2]
     ingreso.create_ingreso(id_usuario_sistema, hora_ingreso, hora_salida)
+
+def retornar_tipo_usuario():
+    tipo = usuarios.obtener_tipo_user_ID(usuario_sistema[0])
+    return tipo

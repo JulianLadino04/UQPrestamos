@@ -1,6 +1,7 @@
 import customtkinter as ctk
 import os
 import logica.proyecto as proyecto
+import interfaces.GUI as ventana_principal
 from PIL import Image
 from tkinter import ttk
 import tkinter as tk
@@ -18,7 +19,7 @@ class consulta_multitabla_parametrico:
         try:
             connection = proyecto.conexion_oracle()
             cursor = connection.cursor()
-            cursor.execute("SELECT * FROM PAGOS")
+            cursor.execute("SELECT * FROM PAGO")
 
             columnas = [desc[0] for desc in cursor.description]
             filas = cursor.fetchall()
@@ -55,6 +56,7 @@ class consulta_multitabla_parametrico:
 
         # Añadir un botón para interactuar con las filas seleccionadas
         ctk.CTkButton(self.root, text="Seleccionar Solicitud", command=self.obtener_seleccion).pack(pady=10)
+        ctk.CTkButton(self.root, text="Ir a Opciones", command=self.ir_a_opciones).pack(pady=10)
 
         self.root.mainloop()
 
@@ -66,3 +68,14 @@ class consulta_multitabla_parametrico:
         else:
             print("No se ha seleccionado ninguna fila")   
     
+    
+    def ir_a_opciones(self):
+        """Cerrar la ventana actual y abrir la ventana de opciones."""
+        self.root.destroy()  # Cierra la ventana de gestión de empleados
+        tipo_usuario = proyecto.retornar_tipo_usuario() + ""
+        ventana_principal.Opciones(tipo_usuario)  # Llama a la ventana de opciones
+        
+    # Método de ejemplo para volver al menú principal
+    def volver_principal(self):
+        self.root.destroy()  # Cierra la ventana actual
+        consulta_multitabla_parametrico()

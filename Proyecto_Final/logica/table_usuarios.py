@@ -107,6 +107,39 @@ def obtener_tipo_user(user: str):
     finally:
         cursor.close()
         connection.close()
+        
+def obtener_tipo_user_ID(id_user: str) -> str:
+    connection = get_connection()
+    cursor = connection.cursor()
+    try:
+        # Consulta para buscar el usuario por su ID
+        sql = """
+        SELECT NIVEL 
+        FROM USUARIO 
+        WHERE ID_USUARIO = :1
+        """
+        cursor.execute(sql, (id_user,))  # Asegúrate de que esto sea una tupla
+
+        usuario = cursor.fetchone()
+
+        if usuario is None:
+            print(f"No se encontró ningún usuario con la id {id_user}.")
+            return None
+        else:
+            # Extraer el valor de la consulta y retornarlo como string
+            tipo_usuario = usuario[0]  # Primer valor es tipo de usuario
+            print(f"Usuario encontrado: Tipo de Usuario={tipo_usuario}")
+            return str(tipo_usuario)
+
+    except Exception as e:
+        print(f"Ocurrió un error al buscar el usuario: {str(e)}")
+        return None
+
+    finally:
+        cursor.close()
+        connection.close()
+        
+        
 def obtener_usuario_user(user: str, contrasena: str):
     connection = get_connection()
     cursor = connection.cursor()
@@ -218,3 +251,4 @@ def get_last_usuario_id():
     finally:
         cursor.close()
         connection.close()
+        

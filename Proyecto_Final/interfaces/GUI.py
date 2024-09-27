@@ -200,7 +200,7 @@ class Opciones:
         self.root.grid_columnconfigure(1, weight=1)
         self.root.grid_columnconfigure(2, weight=1)
 
-        titulo = ctk.CTkLabel(master=self.root, text="Funciones de usuario " + tipo, height=32, font=("Roboto", 30))
+        titulo = ctk.CTkLabel(master=self.root, text="Funciones de usuario ", height=32, font=("Roboto", 30))
         titulo.grid(row=0, column=0, columnspan=3, pady=15, sticky="nsew")
 
         logo = ctk.CTkImage(

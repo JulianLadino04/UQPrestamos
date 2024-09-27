@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import os
+import interfaces.GUI as ventana_principal
 import logica.proyecto as proyecto
 from PIL import Image
 import tkinter as tk
@@ -55,6 +56,9 @@ class RegistrarUsuarios:
 
         # Botón para registrar empleado
         ctk.CTkButton(self.root, text="Registrar Usuario", command=self.validar_campos).pack(pady=20)
+        # Botón para ir a la ventana de opciones
+        ctk.CTkButton(self.root, text="Ir a Opciones", command=self.ir_a_opciones).pack(pady=10)
+
 
     def validar_campos(self):
         identificacion = self.identificacion.get()
@@ -75,5 +79,15 @@ class RegistrarUsuarios:
             self.info_create = ctk.CTkLabel(self.root, text="Se registró correctamente")
             self.info_create.pack()
             print(f"Registrando empleado con Identificación: {identificacion}, Nombre: {nombre}")
-    
+
+        def ir_a_opciones(self):
+            """Cerrar la ventana actual y abrir la ventana de opciones."""
+            self.root.destroy()  # Cierra la ventana de gestión de empleados
+            tipo_usuario = proyecto.retornar_tipo_usuario() + ""
+            ventana_principal.Opciones(tipo_usuario)  # Llama a la ventana de opciones
+        
+    # Método de ejemplo para volver al menú principal
+        def volver_principal(self):
+            self.root.destroy()  # Cierra la ventana actual
+            RegistrarUsuarios()
 

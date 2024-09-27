@@ -3,6 +3,7 @@ import os
 import logica.proyecto as proyecto
 from PIL import Image
 import tkinter as tk
+import interfaces.ventanas.administrador.gestionar_empleados as ge
 
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
@@ -65,6 +66,21 @@ class RegistrarEmpleados:
 
         # Botón para registrar empleado
         ctk.CTkButton(self.root, text="Registrar Empleado", command=self.validar_campos).pack(pady=20)
+        
+        # Botón para salir y volver al menú principal
+        salir_button = ctk.CTkButton(
+            master=self.root,
+            text="Salir",
+            height=40,
+            width=200,
+            command=self.volver_principal  # Asignamos la función aquí
+        )
+        salir_button.pack(pady=20)
+
+    # Definir el método para volver al menú principal
+    def volver_principal(self):
+        self.root.destroy()  # Cierra la ventana actual
+        gestionar_empleados()  # Llama a la función que gestiona empleados o el menú principal
 
     def validar_campos(self):
         identificacion = self.identificacion.get()
@@ -89,3 +105,7 @@ class RegistrarEmpleados:
             self.info_create.pack()
             print(f"Registrando empleado con Identificación: {identificacion}, Nombre: {nombre}, Cargo: {cargo}, Salario: {salario}, ID Sucursal: {sucursal}")
 
+# Función para gestionar empleados o mostrar el menú principal
+def gestionar_empleados():
+    gestionar_empleados_window = ge.gestionar_empleados()
+    gestionar_empleados_window.root.mainloop()

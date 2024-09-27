@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import os
+import interfaces.GUI as ventana_principal
 import logica.proyecto as proyecto
 from PIL import Image
 from tkinter import ttk
@@ -55,6 +56,8 @@ class gestionar_sucursales:
 
         # Añadir un botón para interactuar con las filas seleccionadas
         ctk.CTkButton(self.root, text="Seleccionar Empleado", command=self.obtener_seleccion).pack(pady=10)
+# Botón para ir a la ventana de opciones
+        ctk.CTkButton(self.root, text="Ir a Opciones", command=self.ir_a_opciones).pack(pady=10)
 
         self.root.mainloop()
 
@@ -65,3 +68,14 @@ class gestionar_sucursales:
             print(f"Fila seleccionada: {fila}")
         else:
             print("No se ha seleccionado ninguna fila")   
+
+    def ir_a_opciones(self):
+        """Cerrar la ventana actual y abrir la ventana de opciones."""
+        self.root.destroy()  # Cierra la ventana de gestión de empleados
+        tipo_usuario = proyecto.retornar_tipo_usuario() + ""
+        ventana_principal.Opciones(tipo_usuario)  # Llama a la ventana de opciones
+        
+    # Método de ejemplo para volver al menú principal
+    def volver_principal(self):
+        self.root.destroy()  # Cierra la ventana actual
+        gestionar_sucursales()
