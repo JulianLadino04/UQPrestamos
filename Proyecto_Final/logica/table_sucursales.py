@@ -16,20 +16,30 @@ def get_connection():
 
 ## ----------- SUCURSALES ----------- ##
 
-def create_sucursal(nombre, municipio):
+def create_sucursal(id_sucursal, nombre, municipio):
     connection = get_connection()
     cursor = connection.cursor()
+
+    # Verificar si la ID ya existe
+    check_sql = "SELECT COUNT(*) FROM SUCURSAL WHERE ID_SUCURSAL = :1"
+    cursor.execute(check_sql, (id_sucursal,))
+    result = cursor.fetchone()
+
+    if result[0] > 0:
+        print(f"Error: La sucursal con ID {id_sucursal} ya existe.")
+    else:
+        # Insertar nueva sucursal si la ID no se repite
+        sql = """
+        INSERT INTO SUCURSAL (ID_SUCURSAL, NOMBRE, MUNICIPIO)
+        VALUES (:1, :2, :3)
+        """  
+        cursor.execute(sql, (id_sucursal, nombre, municipio))
+        connection.commit()
+        print("Sucursal creada correctamente")
     
-    id = get_last_sucursal_id() + 1    
-    sql = """
-    INSERT INTO SUCURSAL (ID_SUCURSAL, NOMBRE, MUNICIPIO)
-    VALUES (:1, :2, :3)
-    """  
-    cursor.execute(sql, (id, nombre, municipio))
-    connection.commit()
-    print("Sucursal creada correctamente")
     cursor.close()
     connection.close()
+
 
 def obtener_sucursal(id : int):
     connection = get_connection()

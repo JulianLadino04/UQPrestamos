@@ -2,7 +2,6 @@ import customtkinter as ctk
 import os
 import interfaces.GUI as ventana_principal
 import logica.proyecto as proyecto
-from PIL import Image
 import tkinter as tk
 
 ctk.set_appearance_mode("System")

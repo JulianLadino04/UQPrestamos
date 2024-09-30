@@ -2,6 +2,8 @@ import customtkinter as ctk
 import os
 import interfaces.GUI as ventana_principal
 import logica.proyecto as proyecto
+import interfaces.ventanas.administrador.gestionar_sucursal_editar as eds
+import interfaces.ventanas.administrador.gestionar_sucursal_registrar as regs
 from PIL import Image
 from tkinter import ttk
 import tkinter as tk
@@ -59,9 +61,9 @@ class gestionar_sucursales:
         botones_frame.pack(pady=10)
 
         # Añadir los botones alineados en fila utilizando grid
-        ctk.CTkButton(botones_frame, text="Editar Sucursal", command=self.obtener_seleccion).grid(row=0, column=0, padx=10)
-        ctk.CTkButton(botones_frame, text="Eliminar Sucursal", command=self.obtener_seleccion).grid(row=0, column=1, padx=10)
-        ctk.CTkButton(botones_frame, text="Crear Sucursal", command=self.obtener_seleccion).grid(row=0, column=2, padx=10)
+        ctk.CTkButton(botones_frame, text="Editar Sucursal", command=self.editar_sucursal).grid(row=0, column=0, padx=10)
+        ctk.CTkButton(botones_frame, text="Eliminar Sucursal", command=self.eliminar_sucursal).grid(row=0, column=1, padx=10)
+        ctk.CTkButton(botones_frame, text="Crear Sucursal", command=self.crear_sucursal).grid(row=0, column=2, padx=10)
         
 
 # Botón para ir a la ventana de opciones
@@ -75,15 +77,39 @@ class gestionar_sucursales:
             fila = self.tree.item(selected_item)['values']
             print(f"Fila seleccionada: {fila}")
         else:
+            print("No se ha seleccionado ninguna fila")
+            
+    def crear_sucursal(self):
+        self.root.destroy()
+        ingresar_ventana_creacion_sucursal = regs.RegistrarSucursal()
+        ingresar_ventana_creacion_sucursal.root.mainloop()
+                   
+    def editar_sucursal(self):
+        selected_item = self.tree.selection()
+        if selected_item:
+            fila = self.tree.item(selected_item)['values']
+            print(f"Fila seleccionada: {fila}")
+            eds.recibir_sucursales(fila)
+            self.root.destroy()
+            ingresar_ventana_edicion_sucursal = eds.EditarSucursal()
+            ingresar_ventana_edicion_sucursal.root.mainloop()
+        else:
             print("No se ha seleccionado ninguna fila")   
 
+    def eliminar_sucursal(self):
+        selected_item = self.tree.selection()
+        if selected_item:
+            fila = self.tree.item(selected_item)['values']
+            print(f"Fila seleccionada: {fila}")
+            self.root.destroy()
+            proyecto.eliminar_sucursal(fila)
+            gestionar_sucursales()
+        else:
+            print("No se ha seleccionado ninguna fila")   
+            
     def ir_a_opciones(self):
         """Cerrar la ventana actual y abrir la ventana de opciones."""
         self.root.destroy()  # Cierra la ventana de gestión de empleados
         tipo_usuario = proyecto.retornar_tipo_usuario() + ""
         ventana_principal.Opciones(tipo_usuario)  # Llama a la ventana de opciones
         
-    # Método de ejemplo para volver al menú principal
-    def volver_principal(self):
-        self.root.destroy()  # Cierra la ventana actual
-        gestionar_sucursales()

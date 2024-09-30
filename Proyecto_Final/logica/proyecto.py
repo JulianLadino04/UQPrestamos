@@ -12,6 +12,7 @@ import logica.table_nivel as niveles
 import logica.table_cargo as cargos
 import logica.table_estado as estados
 import logica.table_periodo as periodos
+import logica.table_municipio as municipio
 
 usuario_sistema = []
 from tkinter import Image
@@ -145,15 +146,41 @@ def enviar_imagen(nombre_imagen: str):
     print(os.path.join(carpeta_imagenes, nombre_imagen+".png"))
     return os.path.join(carpeta_imagenes, nombre_imagen+".png")
 
+# FUNCIONALIDADES EMPLEADOS
+
 def crear_empleado(identificacion, nombre, cargo, salario, sucursal, nivel, usuario, contrasena):
     empleados.crear_empleado(identificacion,nombre,cargo, salario, sucursal, nivel, usuario, contrasena)
-    
 
+def editar_empleado(identificacion, nombre, cargo, salario, sucursal, nivel):
+    empleados.actualizar_empleado(identificacion, nombre, cargo, salario, sucursal, nivel)  
+
+# FUNCIONALIDADES USUARIO
 def crear_usuario(identificacion, nombre, usuario, contrasena, nivel):
     usuarios.create_usuario(identificacion,nombre, usuario, contrasena, nivel)
 
 def almacenar_usuario_sistema(id_usuario):
     usuario_sistema.append(id_usuario)
+        
+# FUNCIONALIDADES SUCURSAL
+def crear_sucursal(id_sucursal, nombre, municipio):
+    sucursales.create_sucursal(id_sucursal, nombre, municipio)
+    
+    
+def editar_sucursal(id_sucursal, nombre, municipio):
+    sucursales.update_sucursal(id_sucursal, nombre, municipio)
+
+def eliminar_sucursal(fila):
+    id_sucursal = fila[0]
+    sucursales.delete_sucursal(id_sucursal)
+
+
+# FUNCIONALIDADES MUNICIPIOS
+
+def enviar_municipios():
+    return municipio.obtener_nombres_municipios()
+
+def crear_municipio(nombre):
+    municipio.create_nombre(nombre)
     
 def hora_ingreso_usuario():
     usuario_sistema.append(datetime.now())
@@ -171,3 +198,7 @@ def ingresar_ingreso_sistema():
 def retornar_tipo_usuario():
     tipo = usuarios.obtener_tipo_user_ID(usuario_sistema[0])
     return tipo
+
+def eliminar_empleado(elementos):
+    identificacion = elementos[0]
+    empleados.eliminar_empleado(identificacion) 

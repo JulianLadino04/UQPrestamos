@@ -5,7 +5,7 @@ import interfaces.GUI as ventana_principal
 from PIL import Image
 from tkinter import ttk
 import tkinter as tk
-import interfaces.ventanas.administrador.registrar_usuario as regUS
+import interfaces.ventanas.administrador.gestionar_usuario_registrar as regUS
    
 class gestionar_usuarios:
     def __init__(self):

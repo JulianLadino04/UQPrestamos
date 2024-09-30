@@ -63,8 +63,7 @@ def leer_empleados():
         cursor.close()
         connection.close()
 
-
-def actualizar_empleado(ID_EMPLEADO, nuevo_nombre=None, nuevo_cargo=None, nuevo_salario=None, nueva_sucursal=None):
+def actualizar_empleado(ID_EMPLEADO, nuevo_nombre=None, nuevo_cargo=None, nuevo_salario=None, nueva_sucursal=None, nivel=None):
     connection = get_connection()
     cursor = connection.cursor()
     try:
@@ -73,40 +72,58 @@ def actualizar_empleado(ID_EMPLEADO, nuevo_nombre=None, nuevo_cargo=None, nuevo_
         updates = []
         params = []
 
+        # Actualizar nombre
         if nuevo_nombre:
             updates.append("nombre = :1")
             params.append(nuevo_nombre)
 
+        # Actualizar cargo con validación
         if nuevo_cargo:
-            if nuevo_cargo not in ["Operario", "Administrativo", "Ejecutivo"]:
-                print("El cargo no es válido. Debe ser uno de los siguientes: Operario, Administrativo, Ejecutivo.")
+            if nuevo_cargo not in ["Operario", "Administrativo", "Ejecutivo", "Otro"]:
+                print("El cargo no es válido. Debe ser uno de los siguientes: Operario, Administrativo, Ejecutivo, Otro.")
                 return
             updates.append("cargo = :2")
             params.append(nuevo_cargo)
 
+        # Actualizar salario
         if nuevo_salario:
             updates.append("salario = :3")
             params.append(nuevo_salario)
 
+        # Actualizar sucursal
         if nueva_sucursal:
             updates.append("id_sucursal = :4")
             params.append(nueva_sucursal)
 
+        # Actualizar nivel con validación y usando el nombre correcto de la columna
+        if nivel:
+            if nivel not in ["Tesoreria", "Principal", "Empleado"]:
+                print("El nivel no es válido. Debe ser uno de los siguientes: Tesoreria, Principal, Empleado.")
+                return
+            updates.append("nivel_sistema = :5")
+            params.append(nivel)
+
         # Unimos las partes de la consulta
-        sql += ", ".join(updates) + " WHERE ID_EMPLEADO = :5"
+        if not updates:
+            print("No se especificó ningún campo para actualizar.")
+            return
+
+        sql += ", ".join(updates) + " WHERE ID_EMPLEADO = :6"
         params.append(ID_EMPLEADO)
 
         # Ejecutamos la consulta con los parámetros
         cursor.execute(sql, params)
         connection.commit()
         print(f"Empleado con identificación '{ID_EMPLEADO}' actualizado correctamente.")
+    
     except Exception as e:
         print(f"Error al actualizar el empleado: {e}")
+    
     finally:
         cursor.close()
         connection.close()
 
-
+        
 def eliminar_empleado(ID_EMPLEADO):
     connection = get_connection()
     cursor = connection.cursor()

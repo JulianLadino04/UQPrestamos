@@ -4,7 +4,8 @@ import interfaces.GUI as ventana_principal
 import logica.proyecto as proyecto
 from tkinter import ttk
 import tkinter as tk
-import interfaces.ventanas.administrador.registrar_empleado as reg
+import interfaces.ventanas.administrador.gestionar_empleado_registrar as reg
+import interfaces.ventanas.administrador.gestionar_empleado_editar as edt
 
 class gestionar_empleados:
     def __init__(self):
@@ -59,8 +60,8 @@ class gestionar_empleados:
         botones_frame.pack(pady=10)
 
         # Añadir los botones alineados en fila utilizando grid
-        ctk.CTkButton(botones_frame, text="Editar Empleado", command=self.obtener_seleccion).grid(row=0, column=0, padx=10)
-        ctk.CTkButton(botones_frame, text="Eliminar Empleado", command=self.obtener_seleccion).grid(row=0, column=1, padx=10)
+        ctk.CTkButton(botones_frame, text="Editar Empleado", command=self.enviar_empleado).grid(row=0, column=0, padx=10)
+        ctk.CTkButton(botones_frame, text="Eliminar Empleado", command=self.eliminar_empleado).grid(row=0, column=1, padx=10)
         ctk.CTkButton(botones_frame, text="Crear Empleado", command=self.ventana_creacion).grid(row=0, column=2, padx=10)
 
         # Botón para ir a la ventana de opciones
@@ -77,10 +78,34 @@ class gestionar_empleados:
         else:
             print("No se ha seleccionado ninguna fila")   
 
-    def ventana_creacion(self):
-        ingresar_ventana_creacion_empleado = reg.RegistrarEmpleados()
-        ingresar_ventana_creacion_empleado.root.mainloop()
+    def enviar_empleado(self):
+        selected_item = self.tree.selection()
+        if selected_item:
+            fila = self.tree.item(selected_item)['values']
+            print(f"Fila seleccionada: {fila}")
+            edt.recibir_empleado(fila)
+            self.root.destroy() 
+            ingresar_ventana_edicion_empleado = edt.EditarEmpleados()
+            ingresar_ventana_edicion_empleado.root.mainloop()
+        else:
+            print("No se ha seleccionado ninguna fila")   
 
+    def eliminar_empleado(self):
+        selected_item = self.tree.selection()
+        if selected_item:
+            fila = self.tree.item(selected_item)['values']
+            print(f"Fila seleccionada: {fila}")
+            self.root.destroy()
+            proyecto.eliminar_empleado(fila)
+            gestionar_empleados()
+        else:
+            print("No se ha seleccionado ninguna fila")   
+            
+    def ventana_creacion(self):
+        self.root.destroy() 
+        ingresar_ventana_creacion_empleado = reg.RegistrarEmpleados()
+        ingresar_ventana_creacion_empleado.root.mainloop()       
+        
     def ir_a_opciones(self):
         """Cerrar la ventana actual y abrir la ventana de opciones."""
         self.root.destroy()  # Cierra la ventana de gestión de empleados
