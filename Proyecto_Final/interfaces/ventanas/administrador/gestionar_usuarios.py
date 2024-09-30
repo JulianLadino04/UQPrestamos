@@ -6,6 +6,7 @@ from PIL import Image
 from tkinter import ttk
 import tkinter as tk
 import interfaces.ventanas.administrador.gestionar_usuario_registrar as regUS
+import interfaces.ventanas.administrador.gestionar_empleado_editar as edtUs
    
 class gestionar_usuarios:
     def __init__(self):
@@ -69,7 +70,8 @@ class gestionar_usuarios:
         self.root.mainloop()
 
     def ventana_creacion(self):
-        ingresar_ventana_creacion_usuario = regUS.RegistrarUsuarios()
+        self.root.destroy()
+        ingresar_ventana_creacion_usuario = edtUs.EditarUsuario()
         ingresar_ventana_creacion_usuario.root.mainloop()   
 
     def obtener_seleccion(self):
@@ -81,6 +83,11 @@ class gestionar_usuarios:
             print("No se ha seleccionado ninguna fila")   
     
     
+    def editar_usuario(self):
+        self.root.destroy()
+        ingresar_ventana_edicion_usuario = regUS.RegistrarUsuarios()
+        ingresar_ventana_edicion_usuario.root.mainloop()   
+   
     def ir_a_opciones(self):
         """Cerrar la ventana actual y abrir la ventana de opciones."""
         self.root.destroy()  # Cierra la ventana de gestión de empleados

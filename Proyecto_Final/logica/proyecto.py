@@ -158,6 +158,10 @@ def editar_empleado(identificacion, nombre, cargo, salario, sucursal, nivel):
 def crear_usuario(identificacion, nombre, usuario, contrasena, nivel):
     usuarios.create_usuario(identificacion,nombre, usuario, contrasena, nivel)
 
+def editar_usuario(identificacion, nombre, usuario, contrasena, nivel):
+    usuarios.update_usuario(identificacion,nombre, usuario, contrasena, nivel)
+
+
 def almacenar_usuario_sistema(id_usuario):
     usuario_sistema.append(id_usuario)
         

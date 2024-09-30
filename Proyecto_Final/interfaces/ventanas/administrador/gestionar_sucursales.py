@@ -64,9 +64,6 @@ class gestionar_sucursales:
         ctk.CTkButton(botones_frame, text="Editar Sucursal", command=self.editar_sucursal).grid(row=0, column=0, padx=10)
         ctk.CTkButton(botones_frame, text="Eliminar Sucursal", command=self.eliminar_sucursal).grid(row=0, column=1, padx=10)
         ctk.CTkButton(botones_frame, text="Crear Sucursal", command=self.crear_sucursal).grid(row=0, column=2, padx=10)
-        
-
-# Botón para ir a la ventana de opciones
         ctk.CTkButton(self.root, text="Ir a Opciones", command=self.ir_a_opciones).pack(pady=10)
 
         self.root.mainloop()

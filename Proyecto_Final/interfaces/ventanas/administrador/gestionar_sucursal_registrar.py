@@ -9,10 +9,11 @@ import interfaces.ventanas.administrador.gestionar_sucursales as gs
 
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
-municipios = [str(municipios) for municipios in proyecto.enviar_municipios()]
 
 class RegistrarSucursal:
     def __init__(self):
+        municipios = [str(municipios) for municipios in proyecto.enviar_municipios()]
+
         # Crear la ventana principal
         self.root = ctk.CTk()
         self.root.title("Registro Empleados")
@@ -52,6 +53,7 @@ class RegistrarSucursal:
         
     # Definir el método para volver al menú principal
     def volver_sucursales(self):
+        self.root.destroy()
         ingresar_ventana_creacion_sucursal = gs.gestionar_sucursales()
         ingresar_ventana_creacion_sucursal.root.mainloop() 
 

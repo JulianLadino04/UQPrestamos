@@ -177,21 +177,36 @@ def obtener_usuario_user(user: str, contrasena: str):
         cursor.close()
         connection.close()
     
-def update_usuario(user_id, username, password, nivel : str):
+# Función para actualizar un usuario en la base de datos
+def update_usuario(user_id, username, password, nivel, nombre):
+    # Asegúrate de que el nivel sea válido antes de proceder
+    niveles = ["Tesoreria", "Empleado", "Principal"]  # Asegúrate de definir todos los niveles válidos
     if nivel not in niveles:
-        print("Nivel no valido")
+        print("Nivel no válido")
         return  # Salimos de la función si el nivel no es válido
 
+    # Realiza la conexión a la base de datos
     connection = get_connection()
     cursor = connection.cursor()
     try:
-        sql = "UPDATE USUARIO SET USERNAME = :1, PASSWORD = :2, NIVEL = :3 WHERE ID_USUARIO = :4"
-        cursor.execute(sql, (username, password, nivel, user_id))
+        # Consulta SQL para actualizar el usuario
+        sql = """
+        UPDATE USUARIO 
+        SET USERNAME = :1, PASSWORD = :2, NIVEL = :3, NOMBRE = :4
+        WHERE ID_USUARIO = :5
+        """
+        # Ejecuta la consulta con los valores proporcionados
+        cursor.execute(sql, (username, password, nivel, nombre, user_id))
+        
+        # Confirma los cambios
         connection.commit()
+        
         print("Usuario actualizado correctamente")
     except Exception as e:
+        # Manejo de errores
         print(f"Error al actualizar el usuario: {str(e)}")
     finally:
+        # Cerrar el cursor y la conexión
         cursor.close()
         connection.close()
 

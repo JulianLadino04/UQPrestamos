@@ -19,16 +19,7 @@ class RegistrarUsuarios:
         self.root = ctk.CTk()
         self.root.title("Registro de Usuarios")
         self.root.geometry("750x450")
-        
-        # logo = ctk.CTkImage(
-        #     light_image=Image.open(proyecto.enviar_imagen("registrar")),
-        #     dark_image=Image.open(proyecto.enviar_imagen("registrar")),
-        #     size=(200, 200)
-        # )
-
-        # etiqueta = ctk.CTkLabel(master=self.root, image=logo, text="GH")
-        # etiqueta.pack(pady=15)
-        # Frame para los campos
+    
         form_frame = ctk.CTkFrame(self.root)
         form_frame.pack(pady=10, padx=20, fill="both", expand=True)
 
@@ -51,15 +42,15 @@ class RegistrarUsuarios:
 
         ctk.CTkLabel(form_frame, text="Nivel en Sistema", font=("Roboto", 18)).pack(pady=6)
         self.nivel_sis = tk.StringVar()
+        
         ctk.CTkOptionMenu(form_frame, variable=self.nivel_sis, values=niveles_en_cadenas).pack(pady=6)
-
         # Botón para registrar empleado
-        ctk.CTkButton(self.root, text="Registrar Usuario", command=self.validar_campos).pack(pady=20)
+        ctk.CTkButton(self.root, text="Registrar Usuario", command=self.registrar_usuario).pack(pady=20)
         # Botón para ir a la ventana de opciones
         ctk.CTkButton(self.root, text="Ir a Opciones", command=self.ir_a_opciones).pack(pady=10)
 
 
-    def validar_campos(self):
+    def registrar_usuario(self):
         identificacion = self.identificacion.get()
         nombre = self.nombre.get()
         nivel = self.nivel_sis.get()
@@ -79,14 +70,14 @@ class RegistrarUsuarios:
             self.info_create.pack()
             print(f"Registrando empleado con Identificación: {identificacion}, Nombre: {nombre}")
 
-        def ir_a_opciones(self):
-            """Cerrar la ventana actual y abrir la ventana de opciones."""
-            self.root.destroy()  # Cierra la ventana de gestión de empleados
-            tipo_usuario = proyecto.retornar_tipo_usuario() + ""
-            ventana_principal.Opciones(tipo_usuario)  # Llama a la ventana de opciones
+    def ir_a_opciones(self):
+        """Cerrar la ventana actual y abrir la ventana de opciones."""
+        self.root.destroy()  # Cierra la ventana de gestión de empleados
+        tipo_usuario = proyecto.retornar_tipo_usuario()
+        ventana_principal.Opciones(tipo_usuario)  # Llama a la ventana de opciones
         
     # Método de ejemplo para volver al menú principal
-        def volver_principal(self):
-            self.root.destroy()  # Cierra la ventana actual
-            RegistrarUsuarios()
+    def volver_principal(self):
+        self.root.destroy()  # Cierra la ventana actual
+        RegistrarUsuarios()
 

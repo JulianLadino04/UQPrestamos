@@ -38,7 +38,6 @@ class CrearMunicipio:
 
     def crear_municipio(self):
         nombre = self.nombre.get()
-    
         if nombre == "":
             if hasattr(self, "info_create"):
                 self.info_create.destroy()

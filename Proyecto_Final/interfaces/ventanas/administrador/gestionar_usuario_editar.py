@@ -23,7 +23,7 @@ def recibir_empleado(datos_empleado):
     global datos
     datos = datos_empleado
     
-class EditarEmpleados:
+class EditarUsuario:
     def __init__(self):
         # Crear la ventana principal
         self.root = ctk.CTk()
@@ -69,7 +69,7 @@ class EditarEmpleados:
         self.nivel_sis.set(datos[5]) 
         
         # Botón para registrar empleado
-        ctk.CTkButton(self.root, text="Editar Empleado", command=self.validar_campos).pack(pady=20)
+        ctk.CTkButton(self.root, text="Editar Empleado", command=self.editar_usuario).pack(pady=20)
         
         # Botón para salir y volver al menú principal
         salir_button = ctk.CTkButton(
@@ -86,7 +86,7 @@ class EditarEmpleados:
         self.root.destroy()  # Cierra la ventana actual
         gestionar_empleados()  # Llama a la función que gestiona empleados o el menú principal
 
-    def validar_campos(self):
+    def editar_usuario(self):
         identificacion = self.identificacion.get()
         nombre = self.nombre.get()
         cargo = self.cargo.get()
@@ -102,7 +102,7 @@ class EditarEmpleados:
         else:
             if hasattr(self, "info_create"):
                 self.info_create.destroy()
-            proyecto.editar_empleado(identificacion, nombre, cargo, salario, sucursal, nivel)
+            proyecto.editar_usuario(identificacion, nombre, cargo, salario, sucursal, nivel)
             self.info_create = ctk.CTkLabel(self.root, text="Se edito correctamente")
             self.info_create.pack()
             print(f"Registrando empleado con Identificación: {identificacion}, Nombre: {nombre}, Cargo: {cargo}, Salario: {salario}, ID Sucursal: {sucursal}")
