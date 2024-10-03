@@ -5,6 +5,8 @@ import interfaces.GUI as ventana_principal
 from PIL import Image
 from tkinter import ttk
 import tkinter as tk
+import interfaces.ventanas.parametrico.gestionar_prestamos_parametrico_crear as regUS
+import interfaces.ventanas.parametrico.gestionar_prestamos_parametrico_editar as edtUs
            
 class gestionar_prestamos_parametrico: 
     def __init__(self):
@@ -59,9 +61,9 @@ class gestionar_prestamos_parametrico:
         botones_frame.pack(pady=10)
 
         # Añadir los botones alineados en fila utilizando grid
-        ctk.CTkButton(botones_frame, text="Editar Solicitud", command=self.obtener_seleccion).grid(row=0, column=0, padx=10)
-        ctk.CTkButton(botones_frame, text="Eliminar Solicitud", command=self.obtener_seleccion).grid(row=0, column=1, padx=10)
-        ctk.CTkButton(botones_frame, text="Crear Solicitud", command=self.obtener_seleccion).grid(row=0, column=2, padx=10)
+        ctk.CTkButton(botones_frame, text="Editar Solicitud", command=self.enviar_usuario).grid(row=0, column=0, padx=10)
+        ctk.CTkButton(botones_frame, text="Eliminar Solicitud", command=self.eliminar_usuario).grid(row=0, column=1, padx=10)
+        ctk.CTkButton(botones_frame, text="Crear Solicitud", command=self.ventana_creacion).grid(row=0, column=2, padx=10)
         ctk.CTkButton(self.root, text="Ir a Opciones", command=self.ir_a_opciones).pack(pady=10)
 
         self.root.mainloop()
@@ -73,6 +75,34 @@ class gestionar_prestamos_parametrico:
             print(f"Fila seleccionada: {fila}")
         else:
             print("No se ha seleccionado ninguna fila")
+
+    def ventana_creacion(self):
+        self.root.destroy()
+        ingresar_ventana_creacion_usuario = regUS.RegistrarPrestamoParametrico()
+        ingresar_ventana_creacion_usuario.root.mainloop()   
+
+    def enviar_usuario(self):
+        selected_item = self.tree.selection()
+        if selected_item:
+            fila = self.tree.item(selected_item)['values']
+            print(f"Fila seleccionada: {fila}")
+            edtUs.recibir_prestamo(fila)
+            self.root.destroy() 
+            ingresar_ventana_edicion_usuario = edtUs.EditarPrestamoParametrico()
+            ingresar_ventana_edicion_usuario.root.mainloop()
+        else:
+            print("No se ha seleccionado ninguna fila")    
+
+    def eliminar_usuario(self):
+        selected_item = self.tree.selection()
+        if selected_item:
+            fila = self.tree.item(selected_item)['values']
+            print(f"Fila seleccionada: {fila}")
+            self.root.destroy()
+            proyecto.eliminar_prestamo(fila)
+            gestionar_prestamos_parametrico()
+        else:
+            print("No se ha seleccionado ninguna fila")   
     
     def ir_a_opciones(self):
         """Cerrar la ventana actual y abrir la ventana de opciones."""

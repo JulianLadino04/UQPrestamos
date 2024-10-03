@@ -111,3 +111,4 @@ class EditarEmpleados:
 def gestionar_empleados():
     gestionar_empleados_window = ge.gestionar_empleados()
     gestionar_empleados_window.root.mainloop()
+    

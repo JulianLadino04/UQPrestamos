@@ -5,7 +5,7 @@ def get_connection():
     try:
         connection = oracledb.connect(
             user="SYSTEM",
-            password="0000",
+            password="1091884402",
             dsn="localhost:1521/xe"
         )
         return connection
@@ -94,6 +94,20 @@ def buscar_estado_por_nombre(nombre_estado):
             return None
     except Exception as e:
         print(f"Error al buscar el estado: {e}")
+    finally:
+        cursor.close()
+        connection.close()
+
+def obtener_estados():
+    connection = get_connection()
+    cursor = connection.cursor()
+    try:
+        sql = "SELECT * FROM ESTADO"
+        cursor.execute(sql)
+        records = cursor.fetchall()
+        return records
+    except Exception as e:
+        print(f"Error al mostrar estados: {e}")
     finally:
         cursor.close()
         connection.close()
