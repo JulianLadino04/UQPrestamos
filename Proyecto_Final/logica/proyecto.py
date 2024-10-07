@@ -27,7 +27,7 @@ def conexion_oracle():
     try:
         connection = oracledb.connect(
             user="SYSTEM", 
-            password="0000", 
+            password="1091884402", 
             dsn="localhost:1521/xe"
         )
         return connection
@@ -152,15 +152,29 @@ def crear_empleado(identificacion, nombre, cargo, salario, sucursal, nivel, usua
     empleados.crear_empleado(identificacion,nombre,cargo, salario, sucursal, nivel, usuario, contrasena)
 
 def editar_empleado(identificacion, nombre, cargo, salario, sucursal, nivel):
-    empleados.actualizar_empleado(identificacion, nombre, cargo, salario, sucursal, nivel)  
+    empleados.actualizar_empleado(identificacion, nombre, cargo, salario, sucursal, nivel) 
+
+def eliminar_empleado(elementos):
+    identificacion = elementos[0]
+    empleados.eliminar_empleado(identificacion) 
+
+def enviar_id_empleados():
+    ids_empleados = empleados.obtener_id_empleados()
+    if ids_empleados is None:
+        return ["No hay empleados aun"]
+    else:
+        return ids_empleados
 
 # FUNCIONALIDADES USUARIO
 def crear_usuario(identificacion, nombre, usuario, contrasena, nivel):
     usuarios.create_usuario(identificacion,nombre, usuario, contrasena, nivel)
 
-def editar_usuario(identificacion, nombre, usuario, contrasena, nivel):
-    usuarios.update_usuario(identificacion,nombre, usuario, contrasena, nivel)
+def editar_usuario(identificacion, usuario, contrasena, nivel, nombre):
+    usuarios.update_usuario(identificacion, usuario, contrasena, nivel, nombre)
 
+def eliminar_usuario(elementos):
+    identificacion = elementos[0]
+    usuarios.delete_usuario(identificacion) 
 
 def almacenar_usuario_sistema(id_usuario):
     usuario_sistema.append(id_usuario)
@@ -203,6 +217,27 @@ def retornar_tipo_usuario():
     tipo = usuarios.obtener_tipo_user_ID(usuario_sistema[0])
     return tipo
 
-def eliminar_empleado(elementos):
+#FUNCIONALIDADES SOLICITUDES
+
+def eliminar_solicitud(elementos):
     identificacion = elementos[0]
-    empleados.eliminar_empleado(identificacion) 
+    solicitudes.eliminar_solicitud(identificacion) 
+
+def editar_solicitud(id_solicitud, monto, periodo):
+    solicitudes.update_solicitud(id_solicitud, monto, periodo)
+
+def crear_solicitud(fecha_solicitud, empleado_id, monto, periodo):
+    solicitudes.registrar_solicitud(fecha_solicitud, empleado_id, monto, periodo)
+
+#FUNCIONALIDADES PRESTAMOS
+
+def editar_prestamo(id_prestamo,monto, periodo):
+    prestamos.update_prestamo(id_prestamo,monto, periodo)
+
+def crear_prestamo(fecha_solicitud, empleado_id, monto, periodo, tasa_interes, fecha_desembolso):
+    prestamos.create_prestamo(fecha_solicitud, empleado_id, monto, periodo, tasa_interes, fecha_desembolso)
+
+def eliminar_prestamo(fila):
+    id_prestamo = fila[0]
+    prestamos.delete_prestamo(id_prestamo)
+    

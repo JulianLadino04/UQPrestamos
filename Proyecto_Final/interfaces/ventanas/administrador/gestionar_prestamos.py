@@ -2,9 +2,10 @@ import customtkinter as ctk
 import os
 import interfaces.GUI as ventana_principal
 import logica.proyecto as proyecto
-from PIL import Image
 from tkinter import ttk
 import tkinter as tk
+import interfaces.ventanas.administrador.gestionar_prestamos_crear as regUS
+import interfaces.ventanas.administrador.gestionar_prestamos_editar as edtUs
   
 class gestionar_prestamos:
     def __init__(self):
@@ -58,9 +59,9 @@ class gestionar_prestamos:
         botones_frame.pack(pady=10)
 
         # Añadir los botones alineados en fila utilizando grid
-        ctk.CTkButton(botones_frame, text="Editar Prestamo", command=self.obtener_seleccion).grid(row=0, column=0, padx=10)
-        ctk.CTkButton(botones_frame, text="Eliminar Prestamo", command=self.obtener_seleccion).grid(row=0, column=1, padx=10)
-        ctk.CTkButton(botones_frame, text="Crear Prestamo", command=self.obtener_seleccion).grid(row=0, column=2, padx=10)
+        ctk.CTkButton(botones_frame, text="Editar Prestamo", command=self.enviar_usuario).grid(row=0, column=0, padx=10)
+        ctk.CTkButton(botones_frame, text="Eliminar Prestamo", command=self.eliminar_usuario).grid(row=0, column=1, padx=10)
+        ctk.CTkButton(botones_frame, text="Crear Prestamo", command=self.ventana_creacion).grid(row=0, column=2, padx=10)
 
 
         # Botón para ir a la ventana de opciones
@@ -73,6 +74,34 @@ class gestionar_prestamos:
         if selected_item:
             fila = self.tree.item(selected_item)['values']
             print(f"Fila seleccionada: {fila}")
+        else:
+            print("No se ha seleccionado ninguna fila")
+
+    def ventana_creacion(self):
+        self.root.destroy()
+        ingresar_ventana_creacion_usuario = regUS.RegistrarPrestamo()
+        ingresar_ventana_creacion_usuario.root.mainloop()   
+
+    def enviar_usuario(self):
+        selected_item = self.tree.selection()
+        if selected_item:
+            fila = self.tree.item(selected_item)['values']
+            print(f"Fila seleccionada: {fila}")
+            edtUs.recibir_prestamo(fila)
+            self.root.destroy() 
+            ingresar_ventana_edicion_usuario = edtUs.EditarPrestamo()
+            ingresar_ventana_edicion_usuario.root.mainloop()
+        else:
+            print("No se ha seleccionado ninguna fila")    
+
+    def eliminar_usuario(self):
+        selected_item = self.tree.selection()
+        if selected_item:
+            fila = self.tree.item(selected_item)['values']
+            print(f"Fila seleccionada: {fila}")
+            self.root.destroy()
+            proyecto.eliminar_prestamo(fila)
+            gestionar_prestamos()
         else:
             print("No se ha seleccionado ninguna fila")   
     

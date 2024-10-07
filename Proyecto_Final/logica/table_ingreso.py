@@ -5,7 +5,7 @@ def get_connection():
     try:
         connection = oracledb.connect(
             user="SYSTEM", 
-            password="0000", 
+            password="1091884402", 
             dsn="localhost:1521/xe"
         )
         return connection

@@ -5,7 +5,7 @@ def get_connection():
     try:
         connection = oracledb.connect(
             user="SYSTEM",
-            password="0000",
+            password="1091884402",
             dsn="localhost:1521/xe"
         )
         return connection
@@ -150,6 +150,33 @@ def mostrarEmpleados():
             print(x)
     except Exception as e:
         print(f"Error al mostrar empleados: {e}")
+    finally:
+        cursor.close()
+        connection.close()
+
+def obtener_id_empleados():
+    connection = get_connection()  # Asumiendo que esta función devuelve una conexión válida
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT ID_EMPLEADO 
+            FROM EMPLEADO
+            ORDER BY ID_EMPLEADO ASC
+        """)
+
+        ids = cursor.fetchall()  # Obtener todos los resultados
+
+        if ids:
+            # Retornar una lista con solo los valores de los IDs
+            return [id_empleado[0] for id_empleado in ids]
+        else:
+            return []
+
+    except Exception as e:
+        print(f"Ocurrió un error al obtener los IDs de empleados: {str(e)}")
+        return []
+
     finally:
         cursor.close()
         connection.close()

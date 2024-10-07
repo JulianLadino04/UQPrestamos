@@ -5,6 +5,8 @@ import interfaces.GUI as ventana_principal
 from PIL import Image
 from tkinter import ttk
 import tkinter as tk
+import interfaces.ventanas.empleado.gestionar_solicitud_empleado_registrar as reg
+import interfaces.ventanas.empleado.gestionar_solicitud_empleado_editar as edt
 
 # Clase para gestionar la solicitud de empleado
 
@@ -61,9 +63,9 @@ class gestionar_solicitud_empleado:
         botones_frame.pack(pady=10)
 
         # Añadir los botones alineados en fila utilizando grid
-        ctk.CTkButton(botones_frame, text="Editar Solicitud", command=self.obtener_seleccion).grid(row=0, column=0, padx=10)
-        ctk.CTkButton(botones_frame, text="Eliminar Solicitud", command=self.obtener_seleccion).grid(row=0, column=1, padx=10)
-        ctk.CTkButton(botones_frame, text="Crear Solicitud", command=self.obtener_seleccion).grid(row=0, column=2, padx=10)
+        ctk.CTkButton(botones_frame, text="Editar Solicitud", command=self.enviar_empleado).grid(row=0, column=0, padx=10)
+        ctk.CTkButton(botones_frame, text="Eliminar Solicitud", command=self.eliminar_empleado).grid(row=0, column=1, padx=10)
+        ctk.CTkButton(botones_frame, text="Crear Solicitud", command=self.ventana_creacion).grid(row=0, column=2, padx=10)
         ctk.CTkButton(self.root, text="Ir a Opciones", command=self.ir_a_opciones).pack(pady=10)
 
         self.root.mainloop()
@@ -75,6 +77,34 @@ class gestionar_solicitud_empleado:
             print(f"Fila seleccionada: {fila}")
         else:
             print("No se ha seleccionado ninguna fila")
+
+    def enviar_empleado(self):
+        selected_item = self.tree.selection()
+        if selected_item:
+            fila = self.tree.item(selected_item)['values']
+            print(f"Fila seleccionada: {fila}")
+            edt.recibir_solicitud(fila)
+            self.root.destroy() 
+            ingresar_ventana_edicion_solicitud = edt.EditarSolicitudEmpleados()
+            ingresar_ventana_edicion_solicitud.root.mainloop()
+        else:
+            print("No se ha seleccionado ninguna fila")   
+
+    def eliminar_empleado(self):
+        selected_item = self.tree.selection()
+        if selected_item:
+            fila = self.tree.item(selected_item)['values']
+            print(f"Fila seleccionada: {fila}")
+            self.root.destroy()
+            proyecto.eliminar_solicitud(fila)
+            gestionar_solicitud_empleado()
+        else:
+            print("No se ha seleccionado ninguna fila")   
+            
+    def ventana_creacion(self):
+        self.root.destroy() 
+        ingresar_ventana_creacion_solicitud = reg.CrearSolicitudEmpleados()
+        ingresar_ventana_creacion_solicitud.root.mainloop()    
 
     
     def ir_a_opciones(self):

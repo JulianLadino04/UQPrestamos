@@ -3,7 +3,7 @@ import os
 import logica.proyecto as proyecto
 from PIL import Image
 import tkinter as tk
-import interfaces.ventanas.administrador.gestionar_empleados as ge
+import interfaces.ventanas.administrador.gestionar_usuarios as ge
 
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
@@ -19,9 +19,10 @@ cargos_string = [cargo for cargo in cargos_sistema]
 
 datos = []
 
-def recibir_empleado(datos_empleado):
+def recibir_usuario(datos_usuario):
     global datos
-    datos = datos_empleado
+    datos = datos_usuario
+    print(datos_usuario)
     
 class EditarUsuario:
     def __init__(self):
@@ -35,6 +36,12 @@ class EditarUsuario:
         form_frame = ctk.CTkFrame(self.root)
         form_frame.pack(pady=10, padx=20, fill="both", expand=True)
 
+        # Configurar las columnas de forma proporcional para alinear mejor
+        form_frame.grid_columnconfigure(0, weight=1)
+        form_frame.grid_columnconfigure(1, weight=2)
+        form_frame.grid_columnconfigure(2, weight=1)
+        form_frame.grid_columnconfigure(3, weight=2)
+        
         # Primera columna
         ctk.CTkLabel(form_frame, text="Identificación", font=("Roboto", 18)).grid(row=0, column=0, padx=10, pady=6, sticky="e")
         self.identificacion = ctk.CTkEntry(form_frame, width=140)
@@ -45,56 +52,47 @@ class EditarUsuario:
         ctk.CTkLabel(form_frame, text="Nombre", font=("Roboto", 18)).grid(row=1, column=0, padx=10, pady=6, sticky="e")
         self.nombre = ctk.CTkEntry(form_frame, width=140)
         self.nombre.grid(row=1, column=1, padx=10, pady=6, sticky="w")
-        self.nombre.insert(0, datos[1])
+        self.nombre.insert(0, datos[4])
 
-        ctk.CTkLabel(form_frame, text="Salario", font=("Roboto", 18)).grid(row=2, column=0, padx=10, pady=6, sticky="e")
-        self.salario = ctk.CTkEntry(form_frame, width=140)
-        self.salario.grid(row=2, column=1, padx=10, pady=6, sticky="w")
-        self.salario.insert(0, datos[3])
+        ctk.CTkLabel(form_frame, text="Usuario", font=("Roboto", 18)).grid(row=2, column=0, padx=10, pady=6, sticky="e")
+        self.usuario = ctk.CTkEntry(form_frame, width=140)
+        self.usuario.grid(row=2, column=1, padx=10, pady=6, sticky="w")
+        self.usuario.insert(0, datos[1])
 
-        # Segunda columna
-        ctk.CTkLabel(form_frame, text="Cargo", font=("Roboto", 18)).grid(row=0, column=2, padx=10, pady=6, sticky="e")
-        self.cargo = tk.StringVar()
-        ctk.CTkOptionMenu(form_frame, variable=self.cargo, values=cargos_string).grid(row=0, column=3, padx=10, pady=6, sticky="w")
-        self.cargo.set(datos[2]) 
-        
-        ctk.CTkLabel(form_frame, text="ID Sucursal", font=("Roboto", 18)).grid(row=1, column=2, padx=10, pady=6, sticky="e")
-        self.id_sucursal = tk.StringVar()
-        ctk.CTkOptionMenu(form_frame, variable=self.id_sucursal, values=ids_sucursales).grid(row=1, column=3, padx=10, pady=6, sticky="w")
-        self.id_sucursal.set(datos[4]) 
+        ctk.CTkLabel(form_frame, text="Contraseña", font=("Roboto", 18)).grid(row=3, column=0, padx=10, pady=6, sticky="e")
+        self.contraseña = ctk.CTkEntry(form_frame, width=140)
+        self.contraseña.grid(row=3, column=1, padx=10, pady=6, sticky="w")
+        self.contraseña.insert(0, datos[2])
 
-        ctk.CTkLabel(form_frame, text="Nivel en Sistema", font=("Roboto", 18)).grid(row=2, column=2, padx=10, pady=6, sticky="e")
+        ctk.CTkLabel(form_frame, text="Nivel en Sistema", font=("Roboto", 18)).grid(row=4, column=0, padx=10, pady=6, sticky="e")
         self.nivel_sis = tk.StringVar()
-        ctk.CTkOptionMenu(form_frame, variable=self.nivel_sis, values=niveles_en_cadenas).grid(row=2, column=3, padx=10, pady=6, sticky="w")
-        self.nivel_sis.set(datos[5]) 
+        ctk.CTkOptionMenu(form_frame, variable=self.nivel_sis, values=niveles_en_cadenas).grid(row=4, column=1, padx=10, pady=6, sticky="w")
+        self.nivel_sis.set(datos[3]) 
         
-        # Botón para registrar empleado
-        ctk.CTkButton(self.root, text="Editar Empleado", command=self.editar_usuario).pack(pady=20)
-        
-        # Botón para salir y volver al menú principal
-        salir_button = ctk.CTkButton(
-            master=self.root,
-            text="Salir",
-            height=40,
-            width=200,
-            command=self.volver_principal  # Asignamos la función aquí
-        )
-        salir_button.pack(pady=20)
+        # Botón para editar empleado
+        button_frame = ctk.CTkFrame(self.root)
+        button_frame.pack(pady=20)
+
+        editar_button = ctk.CTkButton(button_frame, text="Editar Usuario", command=self.editar_usuario, width=140)
+        editar_button.grid(row=0, column=0, padx=20)
+
+        # Botón para salir
+        salir_button = ctk.CTkButton(button_frame, text="Salir", command=self.volver_principal, width=140)
+        salir_button.grid(row=0, column=1, padx=20)
 
     # Definir el método para volver al menú principal
     def volver_principal(self):
         self.root.destroy()  # Cierra la ventana actual
-        gestionar_empleados()  # Llama a la función que gestiona empleados o el menú principal
+        ge.gestionar_usuarios()  # Llama a la función que gestiona usuarios o el menú principal
 
     def editar_usuario(self):
         identificacion = self.identificacion.get()
         nombre = self.nombre.get()
-        cargo = self.cargo.get()
-        salario = self.salario.get()
-        sucursal = self.id_sucursal.get()
+        usuario = self.usuario.get()
+        contraseña = self.contraseña.get()
         nivel = self.nivel_sis.get()
 
-        if identificacion == "" or nombre == "" or cargo == "" or salario == "" or sucursal == "" or nivel == "" :
+        if identificacion == "" or nombre == ""  or contraseña == ""  or usuario == "" or nivel == "" :
             if hasattr(self, "info_create"):
                 self.info_create.destroy()
             self.info_create = ctk.CTkLabel(self.root, text="Hacen falta datos por llenar")
@@ -102,12 +100,12 @@ class EditarUsuario:
         else:
             if hasattr(self, "info_create"):
                 self.info_create.destroy()
-            proyecto.editar_usuario(identificacion, nombre, cargo, salario, sucursal, nivel)
+            proyecto.editar_usuario(identificacion, usuario, contraseña, nivel, nombre)
             self.info_create = ctk.CTkLabel(self.root, text="Se edito correctamente")
             self.info_create.pack()
-            print(f"Registrando empleado con Identificación: {identificacion}, Nombre: {nombre}, Cargo: {cargo}, Salario: {salario}, ID Sucursal: {sucursal}")
+            print(f"Registrando empleado con Identificación: {identificacion}, Nombre: {nombre}, Usuario: {usuario}, Contraseña: {contraseña}, Nivel: {nivel}")
 
 # Función para gestionar empleados o mostrar el menú principal
 def gestionar_empleados():
-    gestionar_empleados_window = ge.gestionar_empleados()
+    gestionar_empleados_window = ge.gestionar_usuarios()
     gestionar_empleados_window.root.mainloop()

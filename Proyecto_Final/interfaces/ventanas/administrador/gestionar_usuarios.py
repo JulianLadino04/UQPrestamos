@@ -6,7 +6,7 @@ from PIL import Image
 from tkinter import ttk
 import tkinter as tk
 import interfaces.ventanas.administrador.gestionar_usuario_registrar as regUS
-import interfaces.ventanas.administrador.gestionar_empleado_editar as edtUs
+import interfaces.ventanas.administrador.gestionar_usuario_editar as edtUs
    
 class gestionar_usuarios:
     def __init__(self):
@@ -61,8 +61,8 @@ class gestionar_usuarios:
         botones_frame.pack(pady=10)
 
         # Añadir los botones alineados en fila utilizando grid
-        ctk.CTkButton(botones_frame, text="Editar Usuario", command=self.obtener_seleccion).grid(row=0, column=0, padx=10)
-        ctk.CTkButton(botones_frame, text="Eliminar Usuario", command=self.obtener_seleccion).grid(row=0, column=1, padx=10)
+        ctk.CTkButton(botones_frame, text="Editar Usuario", command=self.enviar_usuario).grid(row=0, column=0, padx=10)
+        ctk.CTkButton(botones_frame, text="Eliminar Usuario", command=self.eliminar_usuario).grid(row=0, column=1, padx=10)
         ctk.CTkButton(botones_frame, text="Crear Usuario", command=self.ventana_creacion).grid(row=0, column=2, padx=10)
         # Botón para ir a la ventana de opciones
         ctk.CTkButton(self.root, text="Ir a Opciones", command=self.ir_a_opciones).pack(pady=10)
@@ -71,7 +71,7 @@ class gestionar_usuarios:
 
     def ventana_creacion(self):
         self.root.destroy()
-        ingresar_ventana_creacion_usuario = edtUs.EditarUsuario()
+        ingresar_ventana_creacion_usuario = regUS.RegistrarUsuarios()
         ingresar_ventana_creacion_usuario.root.mainloop()   
 
     def obtener_seleccion(self):
@@ -83,10 +83,28 @@ class gestionar_usuarios:
             print("No se ha seleccionado ninguna fila")   
     
     
-    def editar_usuario(self):
-        self.root.destroy()
-        ingresar_ventana_edicion_usuario = regUS.RegistrarUsuarios()
-        ingresar_ventana_edicion_usuario.root.mainloop()   
+    def enviar_usuario(self):
+        selected_item = self.tree.selection()
+        if selected_item:
+            fila = self.tree.item(selected_item)['values']
+            print(f"Fila seleccionada: {fila}")
+            edtUs.recibir_usuario(fila)
+            self.root.destroy() 
+            ingresar_ventana_edicion_usuario = edtUs.EditarUsuario()
+            ingresar_ventana_edicion_usuario.root.mainloop()
+        else:
+            print("No se ha seleccionado ninguna fila")    
+
+    def eliminar_usuario(self):
+        selected_item = self.tree.selection()
+        if selected_item:
+            fila = self.tree.item(selected_item)['values']
+            print(f"Fila seleccionada: {fila}")
+            self.root.destroy()
+            proyecto.eliminar_usuario(fila)
+            gestionar_usuarios()
+        else:
+            print("No se ha seleccionado ninguna fila")   
    
     def ir_a_opciones(self):
         """Cerrar la ventana actual y abrir la ventana de opciones."""

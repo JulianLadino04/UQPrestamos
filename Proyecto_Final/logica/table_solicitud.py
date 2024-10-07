@@ -6,7 +6,7 @@ def get_connection():
     try:
         connection = oracledb.connect(
             user="SYSTEM",
-            password="0000",
+            password="1091884402",
             dsn="localhost:1521/xe"
         )
         return connection
@@ -32,7 +32,7 @@ def validar_monto(empleado_id, monto):
             'Otros': 12000000
         }
         
-        if monto > limites_monto.get(tipo_empleado, 0):
+        if int(monto) > limites_monto.get(tipo_empleado, 0):
             raise ValueError(f"El monto solicitado excede el límite permitido para el tipo de empleado {tipo_empleado}.")
         else:
             return True
@@ -53,17 +53,24 @@ def registrar_solicitud(fecha_solicitud, empleado_id, monto, periodo):
     cursor = connection.cursor()
     
     try:
-        # Asignar tasa de interés según el período
-        tasas_interes = {
-            24: 7.0,
-            36: 7.5,
-            48: 8.0,
-            60: 8.3,
-            72: 8.6
-        }
-        tasa_interes = tasas_interes.get(periodo, None)
-        if tasa_interes is None:
+        # Convertir periodo a entero
+        periodo = int(periodo)
+
+        # Asignar tasa de interés según el período usando if-elif-else
+        if periodo == 24:
+            tasa_interes = 7.0
+        elif periodo == 36:
+            tasa_interes = 7.5
+        elif periodo == 48:
+            tasa_interes = 8.0
+        elif periodo == 60:
+            tasa_interes = 8.3
+        elif periodo == 72:
+            tasa_interes = 8.6
+        else:
             raise ValueError(f"Periodo no válido: {periodo}")
+    
+        print(f"Tasa de interés asignada: {tasa_interes}%")
 
         # SQL para insertar la solicitud
         sql = '''INSERT INTO SOLICITUD (FECHA_SOLICITUD, ID_EMPLEADO, MONTO_SOLICITADO, PERIODO_MESES, ESTADO, TASA_INTERES) 
@@ -77,8 +84,12 @@ def registrar_solicitud(fecha_solicitud, empleado_id, monto, periodo):
         
         print(f"Solicitud registrada correctamente con ID: {id_solicitud.getvalue()}")
         return id_solicitud.getvalue()
+    except ValueError as e:
+        print(e)
+
     except Exception as e:
         print(f"Error al registrar la solicitud: {e}")
+
     finally:
         cursor.close()
         connection.close()
@@ -194,3 +205,13 @@ def mostrar_solicitudes():
     finally:
         cursor.close()
         connection.close()
+
+def update_solicitud(solicitud_id, monto, periodo):
+    connection = get_connection()
+    cursor = connection.cursor()
+    sql = "UPDATE SOLICITUD SET MONTO_SOLICITADO = :1, PERIODO_MESES = :2 WHERE ID_SOLICITUD = :3"
+    cursor.execute(sql, (monto, periodo, solicitud_id))
+    connection.commit()
+    cursor.close()
+    connection.close()
+
