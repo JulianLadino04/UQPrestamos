@@ -25,6 +25,7 @@ import interfaces.ventanas.administrador.gestionar_usuarios as gu
 import interfaces.ventanas.administrador.multitabla as mul
 import interfaces.ventanas.administrador.ver_reportes as vr
 import interfaces.ventanas.administrador.visualizar_ingresos as vi
+import interfaces.ventanas.administrador.historial_solicitudes as hi
 
 carpeta_principal = os.path.dirname(__file__)
 carpeta_imagenes = os.path.join(carpeta_principal, "imagenes")
@@ -152,6 +153,10 @@ def multitabla():
     multitabla_window = mul.multitabla()
     multitabla_window.root.mainloop()
 
+def historial_solicitudes():
+    historial_solicitudes = hi.HistorialPrestamos()
+    historial_solicitudes.root.mainloop()
+
 # FUNCIONES BOTONES USUARIO EMPLEADO
 def gestionar_solicitud_empleado():
     gestionar_solicitud_empleado_window = gse.gestionar_solicitud_empleado()
@@ -168,7 +173,7 @@ def gestionar_estado_empleado():
 # Botones según tipo de usuario
 botones_administrador = ['Gestionar Usuarios', 'Gestionar Sucursales', 'Gestionar Empleados', 'Gestionar Solicitudes',
                          'Gestionar Prestamos', 'Gestionar Pagos', 'Visualizar Ingresos',
-                         'Ver Reportes', 'Consulta Multitabla']
+                         'Ver Reportes', 'Consulta Multitabla', 'Historial Prestamos']
 
 botones_parametrico = ['Gestionar Solicitudes', 'Gestionar Prestamos', 'Gestionar Pagos',
                        'Ver Reportes', 'Consulta Multitabla']
@@ -178,7 +183,7 @@ botones_empleado = ['Gestionar Solicitudes', 'Gestionar Pagos', 'Estado Cuenta']
 # Funciones asociadas a los botones
 funciones_botones_administrador = [gestionar_usuarios,gestionar_sucursales, gestionar_empleados,
                                    gestionar_solicitudes, gestionar_prestamos, gestionar_pagos,
-                                   visualizar_ingresos, ver_reportes, multitabla]
+                                   visualizar_ingresos, ver_reportes, multitabla, historial_solicitudes]
 
 funciones_botones_parametrico = [gestionar_solicitud_parametrico, gestionar_prestamos_parametrico,
                                  gestionar_pagos_parametrico, ver_reportes_parametrico, consulta_multitabla_parametrico]

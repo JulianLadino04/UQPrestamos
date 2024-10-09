@@ -234,10 +234,27 @@ def crear_solicitud(fecha_solicitud, empleado_id, monto, periodo):
 def editar_prestamo(id_prestamo,monto, periodo):
     prestamos.update_prestamo(id_prestamo,monto, periodo)
 
-def crear_prestamo(fecha_solicitud, empleado_id, monto, periodo, tasa_interes, fecha_desembolso):
-    prestamos.create_prestamo(fecha_solicitud, empleado_id, monto, periodo, tasa_interes, fecha_desembolso)
+def crear_prestamo(fecha_solicitud, empleado_id, monto, periodo, fecha_desembolso):
+    prestamos.create_prestamo(fecha_solicitud, empleado_id, monto, periodo, fecha_desembolso)
 
 def eliminar_prestamo(fila):
     id_prestamo = fila[0]
     prestamos.delete_prestamo(id_prestamo)
+
+# En logica/proyecto.py
+
+def obtener_historial_prestamos(empleado_id):
+    prestamos_lista = []  # Inicializar la variable 'prestamos' como una lista vacía
+    try:
+        prestamos_lista = prestamos.read_prestamos(empleado_id)  # Suponiendo que read_prestamos ya devuelve la lista de tuplas
+    except Exception as e:
+        print(f"Error al obtener historial de préstamos: {e}")
+    
+    return prestamos_lista  # Devolver la lista (vacía si hay error)
+
+
+
+
+
+
     

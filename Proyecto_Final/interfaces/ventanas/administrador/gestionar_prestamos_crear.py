@@ -9,6 +9,7 @@ import interfaces.ventanas.administrador.gestionar_prestamos as gp
 # Obtener los valores requeridos desde el módulo de lógica
 estados_disponibles = ["Pendiente", "Aprobado", "Rechazado"]  # Estados posibles del préstamo
 empleados_ids = [str(id_empleado) for id_empleado in proyecto.enviar_id_empleados()]  # IDs de empleados disponibles
+periodos_disponibles = ["24", "36", "48", "60", "72"]
 
 class RegistrarPrestamo:
     def __init__(self):
@@ -29,12 +30,8 @@ class RegistrarPrestamo:
         self.monto.pack(pady=2)
 
         ctk.CTkLabel(form_frame, text="Periodo (en meses)", font=("Roboto", 18)).pack(pady=6)
-        self.periodo = ctk.CTkEntry(form_frame, width=140)
+        self.periodo = ctk.CTkOptionMenu(form_frame, values=periodos_disponibles, width=140)
         self.periodo.pack(pady=2)
-
-        ctk.CTkLabel(form_frame, text="Tasa de Interés (%)", font=("Roboto", 18)).pack(pady=6)
-        self.tasa_interes = ctk.CTkEntry(form_frame, width=140)
-        self.tasa_interes.pack(pady=2)
 
         ctk.CTkLabel(form_frame, text="Fecha Desembolso (YYYY-MM-DD)", font=("Roboto", 18)).pack(pady=6)
         self.fecha_desembolso = ctk.CTkEntry(form_frame, width=140)
@@ -53,16 +50,14 @@ class RegistrarPrestamo:
 
     def registrar_prestamo(self):
         # Obtener los valores de los campos
-        id_solicitud = self.id_solicitud.get()
         empleado_id = self.empleado_id.get()
         monto = self.monto.get()
         periodo = self.periodo.get()
-        tasa_interes = self.tasa_interes.get()
         fecha_desembolso = self.fecha_desembolso.get()
 
         # Verificar si todos los campos están llenos
-        if (id_solicitud == "" or empleado_id == "" or monto == "" or 
-            periodo == "" or tasa_interes == "" or fecha_desembolso == ""):
+        if (empleado_id == "" or monto == "" or 
+            periodo == "" or fecha_desembolso == ""):
             if hasattr(self, "info_create"):
                 self.info_create.destroy()
             self.info_create = ctk.CTkLabel(self.root, text="Hacen falta datos por llenar")
@@ -71,10 +66,10 @@ class RegistrarPrestamo:
             if hasattr(self, "info_create"):
                 self.info_create.destroy()
             # Registrar el préstamo
-            proyecto.crear_prestamo(datetime.now(), empleado_id, monto, periodo, tasa_interes, fecha_desembolso)
+            proyecto.crear_prestamo(datetime.now(), empleado_id, monto, periodo, fecha_desembolso)
             self.info_create = ctk.CTkLabel(self.root, text="Préstamo registrado correctamente")
             self.info_create.pack()
-            print(f"Registrando préstamo con ID: {id_solicitud}, Empleado ID: {empleado_id}, Monto: {monto}, Periodo: {periodo}, Tasa Interés: {tasa_interes}, Fecha Desembolso: {fecha_desembolso}")
+            print(f"Registrando préstamo con Empleado ID: {empleado_id}, Monto: {monto}, Periodo: {periodo}, Fecha Desembolso: {fecha_desembolso}")
 
     def volver_principal(self):
         self.root.destroy()

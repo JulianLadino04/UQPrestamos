@@ -21,7 +21,6 @@ class gestionar_prestamos:
             connection = proyecto.conexion_oracle()
             cursor = connection.cursor()
             cursor.execute("SELECT * FROM PRESTAMO")
-
             columnas = [desc[0] for desc in cursor.description]
             filas = cursor.fetchall()
             cursor.close()
