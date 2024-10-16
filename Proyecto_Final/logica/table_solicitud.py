@@ -79,7 +79,7 @@ def registrar_solicitud(fecha_solicitud, empleado_id, monto, periodo):
         # Obtener el ID de la solicitud generada
         id_solicitud = cursor.var(oracledb.NUMBER)
         
-        cursor.execute(sql, (fecha_solicitud, empleado_id, monto, periodo, 'pendiente', tasa_interes, id_solicitud))
+        cursor.execute(sql, (fecha_solicitud, empleado_id, monto, periodo, 'Pendiente', tasa_interes, id_solicitud))
         connection.commit()
         
         print(f"Solicitud registrada correctamente con ID: {id_solicitud.getvalue()}")
@@ -121,7 +121,7 @@ def actualizar_solicitud(id_solicitud, nuevo_estado):
     
     try:
         # Validar que el nuevo estado esté dentro de los valores permitidos
-        estados_permitidos = ['pendiente', 'en estudio', 'aprobada', 'reprobada']
+        estados_permitidos = ['Pendiente', 'En estudio', 'Aprobada', 'Rechazada']
         if nuevo_estado not in estados_permitidos:
             raise ValueError(f"Estado '{nuevo_estado}' no permitido. Solo se permiten: {estados_permitidos}")
         

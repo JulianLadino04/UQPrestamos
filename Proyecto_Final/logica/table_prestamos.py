@@ -49,8 +49,8 @@ def create_prestamo(fecha_solicitud, empleado_id, monto, periodo, fecha_desembol
         sql = '''INSERT INTO PRESTAMO (ID_SOLICITUD, FECHA_SOLICITUD, EMPLEADO_ID, MONTO, PERIODO, ESTADO, TASA_INTERES, FECHA_DESEMBOLSO) 
                  VALUES (:1, :2, :3, :4, :5, :6, :7, :8)'''  # Se corrigió la coma faltante
 
-        # Obtener el ID de la solicitud generada (si es necesario)
-        id_solicitud = random.randint(0, 100)
+        # Obtener el ID de la solicitud generada
+        id_solicitud = cursor.var(oracledb.NUMBER)
 
          # Comprobar si las fechas son ya objetos datetime
         if isinstance(fecha_solicitud, str):
@@ -66,14 +66,14 @@ def create_prestamo(fecha_solicitud, empleado_id, monto, periodo, fecha_desembol
         
         # Si ID_SOLICITUD es autoincremental, no se puede obtener aquí directamente.
         # Esto podría necesitar una consulta para obtener el último ID insertado si no se asigna automáticamente.
-        print(f"Solicitud registrada correctamente con ID: {id_solicitud}")
+        print(f"Prestamo registrado correctamente con ID: {id_solicitud}")
         return id_solicitud  # Esto depende de cómo gestiones el ID en tu base de datos
         
     except ValueError as e:
         print(e)
 
     except Exception as e:
-        print(f"Error al registrar la solicitud: {e}")
+        print(f"Error al registrar el Prestamo: {e}")
 
     finally:
         cursor.close()
@@ -103,6 +103,44 @@ def validar_monto(empleado_id, monto):
     except Exception as e:
         print(f"Error al validar el monto: {e}")
         return False
+    finally:
+        cursor.close()
+        connection.close()
+
+def pasar_solicitud_prestamo(id_solicitud, fecha_solicitud, id_empleado, monto, periodo, estado, tasa_interes, fecha_desembolso):
+    if not validar_monto(id_empleado, monto):
+        print(f"No se pudo registrar el prestamo debido a un monto excedido para el empleado {id_empleado}.")
+        return None
+
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+        # Sentencia SQL para insertar
+        sql = '''INSERT INTO PRESTAMO (ID_SOLICITUD, FECHA_SOLICITUD, EMPLEADO_ID, MONTO, PERIODO, ESTADO, TASA_INTERES, FECHA_DESEMBOLSO) 
+                 VALUES (:1, :2, :3, :4, :5, :6, :7, :8)'''  # Se corrigió la coma faltante
+
+         # Comprobar si las fechas son ya objetos datetime
+        if isinstance(fecha_solicitud, str):
+            fecha_solicitud = datetime.strptime(fecha_solicitud, "%Y-%m-%d")  # Convertir si es cadena
+        if isinstance(fecha_desembolso, str):
+            fecha_desembolso = datetime.strptime(fecha_desembolso, "%Y-%m-%d")  # Convertir si es cadena
+
+        # Ejecutar la inserción
+        cursor.execute(sql, (int(id_solicitud), fecha_solicitud, int(id_empleado), int(monto), int(periodo), estado, float(tasa_interes), fecha_desembolso))
+
+        # Commit para guardar los cambios
+        connection.commit()
+        
+        print(f"Prestamo registrado correctamente con ID: {id_solicitud}")
+        return id_solicitud  # Esto depende de cómo gestiones el ID en tu base de datos
+        
+    except ValueError as e:
+        print(e)
+
+    except Exception as e:
+        print(f"Error al registrar el Prestamo: {e}")
+
     finally:
         cursor.close()
         connection.close()

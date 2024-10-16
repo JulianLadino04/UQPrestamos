@@ -241,6 +241,9 @@ def eliminar_prestamo(fila):
     id_prestamo = fila[0]
     prestamos.delete_prestamo(id_prestamo)
 
+def crear_prestamo_solicitud(id_solicitud, fecha, id_empleado, monto, periodo, estado, tasa_interes, fecha_desembolso):
+    prestamos.pasar_solicitud_prestamo(id_solicitud, fecha, id_empleado, monto, periodo, estado, tasa_interes, fecha_desembolso)
+
 # En logica/proyecto.py
 
 def obtener_historial_prestamos(empleado_id):

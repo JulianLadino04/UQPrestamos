@@ -62,7 +62,7 @@ class gestionar_solicitud_parametrico:
         botones_frame.pack(pady=10)
 
         # Añadir los botones alineados en fila utilizando griwd
-        ctk.CTkButton(botones_frame, text="Editar Solicitud", command=self.enviar_empleado).grid(row=0, column=0, padx=10)
+        ctk.CTkButton(botones_frame, text="Editar Solicitud", command=self.enviar_solicitud).grid(row=0, column=0, padx=10)
         ctk.CTkButton(botones_frame, text="Eliminar Solicitud", command=self.eliminar_empleado).grid(row=0, column=1, padx=10)
         ctk.CTkButton(botones_frame, text="Crear Solicitud", command=self.ventana_creacion).grid(row=0, column=2, padx=10)
         ctk.CTkButton(self.root, text="Ir a Opciones", command=self.ir_a_opciones).pack(pady=10)
@@ -77,7 +77,7 @@ class gestionar_solicitud_parametrico:
         else:
             print("No se ha seleccionado ninguna fila")
 
-    def enviar_empleado(self):
+    def enviar_solicitud(self):
         selected_item = self.tree.selection()
         if selected_item:
             fila = self.tree.item(selected_item)['values']
