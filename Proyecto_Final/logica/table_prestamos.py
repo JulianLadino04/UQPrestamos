@@ -17,7 +17,8 @@ def get_connection():
 
 ## ------------ PRESTAMO --------------- ##
 
-def create_prestamo(fecha_solicitud, empleado_id, monto, periodo, fecha_desembolso):
+def create_prestamo(fecha_solicitud, empleado_id, monto, periodo):
+    
     if not validar_monto(empleado_id, monto):
         print(f"No se pudo registrar la solicitud debido a un monto excedido para el empleado {empleado_id}.")
         return None
@@ -45,35 +46,41 @@ def create_prestamo(fecha_solicitud, empleado_id, monto, periodo, fecha_desembol
     
         print(f"Tasa de interés asignada: {tasa_interes}%")
 
-        # Sentencia SQL para insertar
-        sql = '''INSERT INTO PRESTAMO (ID_SOLICITUD, FECHA_SOLICITUD, EMPLEADO_ID, MONTO, PERIODO, ESTADO, TASA_INTERES, FECHA_DESEMBOLSO) 
-                 VALUES (:1, :2, :3, :4, :5, :6, :7, :8)'''  # Se corrigió la coma faltante
-
-        # Obtener el ID de la solicitud generada
-        id_solicitud = cursor.var(oracledb.NUMBER)
-
-         # Comprobar si las fechas son ya objetos datetime
+        # Asegúrate de que el monto se calcula correctamente
+        monto_total = monto + (monto * tasa_interes / 100)  # Ajusta la tasa a porcentaje
+        valor_cuota = monto_total / periodo
+        
+        # Calcular la fecha de desembolso
         if isinstance(fecha_solicitud, str):
-            fecha_solicitud = datetime.strptime(fecha_solicitud, "%Y-%m-%d")  # Convertir si es cadena
-        if isinstance(fecha_desembolso, str):
-            fecha_desembolso = datetime.strptime(fecha_desembolso, "%Y-%m-%d")  # Convertir si es cadena
+            try:
+                fecha_solicitud = datetime.strptime(fecha_solicitud, "%Y-%m-%d %H:%M:%S")
+            except ValueError:
+                fecha_solicitud = datetime.strptime(fecha_solicitud, "%Y-%m-%d")
+
+        mes_siguiente = fecha_solicitud.month % 12 + 1
+        año_siguiente = fecha_solicitud.year + (fecha_solicitud.month // 12)
+
+        fecha_desembolso = datetime(año_siguiente, mes_siguiente, 3)
+
+        # Obtener el ID_PRESTAMO siguiente
+        cursor.execute("SELECT MAX(ID_PRESTAMO) FROM PRESTAMO")
+        max_id_prestamo = cursor.fetchone()[0]
+        id_prestamo = max_id_prestamo + 1 if max_id_prestamo is not None else 1
+
+        # Sentencia SQL para insertar
+        sql = '''INSERT INTO PRESTAMO (ID_PRESTAMO, FECHA_SOLICITUD, EMPLEADO_ID, MONTO, PERIODO, ESTADO, TASA_INTERES, FECHA_DESEMBOLSO, VALOR_CUOTA) 
+                 VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9)'''
 
         # Ejecutar la inserción
-        cursor.execute(sql, (id_solicitud, fecha_solicitud, empleado_id, monto, periodo, 'Aprobada', tasa_interes, fecha_desembolso))
+        cursor.execute(sql, (id_prestamo, fecha_solicitud, empleado_id, monto_total, periodo, 'APROBADA', tasa_interes, fecha_desembolso, valor_cuota))
 
         # Commit para guardar los cambios
         connection.commit()
-        
-        # Si ID_SOLICITUD es autoincremental, no se puede obtener aquí directamente.
-        # Esto podría necesitar una consulta para obtener el último ID insertado si no se asigna automáticamente.
-        print(f"Prestamo registrado correctamente con ID: {id_solicitud}")
-        return id_solicitud  # Esto depende de cómo gestiones el ID en tu base de datos
-        
-    except ValueError as e:
-        print(e)
+        print(f"Préstamo registrado correctamente con ID: {id_prestamo}")
 
     except Exception as e:
-        print(f"Error al registrar el Prestamo: {e}")
+        print(f"Error al registrar el préstamo: {e}")
+        connection.rollback()  # Revertir si ocurre un error
 
     finally:
         cursor.close()
@@ -107,7 +114,7 @@ def validar_monto(empleado_id, monto):
         cursor.close()
         connection.close()
 
-def pasar_solicitud_prestamo(id_solicitud, fecha_solicitud, id_empleado, monto, periodo, estado, tasa_interes, fecha_desembolso):
+def pasar_solicitud_prestamo(ID_PRESTAMO, fecha_solicitud, id_empleado, monto, periodo, estado, tasa_interes, fecha_desembolso):
     if not validar_monto(id_empleado, monto):
         print(f"No se pudo registrar el prestamo debido a un monto excedido para el empleado {id_empleado}.")
         return None
@@ -117,7 +124,7 @@ def pasar_solicitud_prestamo(id_solicitud, fecha_solicitud, id_empleado, monto, 
 
     try:
         # Sentencia SQL para insertar
-        sql = '''INSERT INTO PRESTAMO (ID_SOLICITUD, FECHA_SOLICITUD, EMPLEADO_ID, MONTO, PERIODO, ESTADO, TASA_INTERES, FECHA_DESEMBOLSO) 
+        sql = '''INSERT INTO PRESTAMO (ID_PRESTAMO, FECHA_SOLICITUD, EMPLEADO_ID, MONTO, PERIODO, ESTADO, TASA_INTERES, FECHA_DESEMBOLSO) 
                  VALUES (:1, :2, :3, :4, :5, :6, :7, :8)'''  # Se corrigió la coma faltante
 
          # Comprobar si las fechas son ya objetos datetime
@@ -127,13 +134,13 @@ def pasar_solicitud_prestamo(id_solicitud, fecha_solicitud, id_empleado, monto, 
             fecha_desembolso = datetime.strptime(fecha_desembolso, "%Y-%m-%d")  # Convertir si es cadena
 
         # Ejecutar la inserción
-        cursor.execute(sql, (int(id_solicitud), fecha_solicitud, int(id_empleado), int(monto), int(periodo), estado, float(tasa_interes), fecha_desembolso))
+        cursor.execute(sql, (int(ID_PRESTAMO), fecha_solicitud, int(id_empleado), int(monto), int(periodo), estado, float(tasa_interes), fecha_desembolso))
 
         # Commit para guardar los cambios
         connection.commit()
         
-        print(f"Prestamo registrado correctamente con ID: {id_solicitud}")
-        return id_solicitud  # Esto depende de cómo gestiones el ID en tu base de datos
+        print(f"Prestamo registrado correctamente con ID: {ID_PRESTAMO}")
+        return ID_PRESTAMO  # Esto depende de cómo gestiones el ID en tu base de datos
         
     except ValueError as e:
         print(e)
@@ -145,8 +152,7 @@ def pasar_solicitud_prestamo(id_solicitud, fecha_solicitud, id_empleado, monto, 
         cursor.close()
         connection.close()
 
-
-def read_prestamos():
+def read_prestamos_todos():
     connection = get_connection()
     cursor = connection.cursor()
     sql = "SELECT * FROM PRESTAMO"
@@ -159,7 +165,7 @@ def read_prestamos():
 def update_prestamo(prestamo_id, monto, periodo):
     connection = get_connection()
     cursor = connection.cursor()
-    sql = "UPDATE PRESTAMO SET MONTO = :1, PERIODO = :2  WHERE ID_SOLICITUDs = :3"
+    sql = "UPDATE PRESTAMO SET MONTO = :1, PERIODO = :2  WHERE ID_PRESTAMO = :3"
     cursor.execute(sql, (monto, periodo, prestamo_id))
     connection.commit()
     cursor.close()
@@ -168,7 +174,7 @@ def update_prestamo(prestamo_id, monto, periodo):
 def delete_prestamo(prestamo_id):
     connection = get_connection()
     cursor = connection.cursor()
-    sql = "DELETE FROM PRESTAMO WHERE ID_SOLICITUD = :1"
+    sql = "DELETE FROM PRESTAMO WHERE ID_PRESTAMO = :1"
     cursor.execute(sql, (prestamo_id,))
     connection.commit()
     cursor.close()
@@ -188,45 +194,31 @@ def mostrarPrestamos():
 
 def read_prestamos(id_empleado):
 
-    # Convertir id_empleado a número, si es necesario
-    id_empleado = int(id_empleado)  # Convertir a entero si es una cadena
+    if not id_empleado:
+        print("Error: id_empleado está vacío. No se puede ejecutar la consulta.")
+        return []
 
-    # Establecer conexión con la base de datos
     connection = get_connection()
-    cursor = connection.cursor()
-
-    # Definir la consulta SQL para obtener préstamos del empleado
-    sql = "SELECT * FROM PRESTAMO WHERE EMPLEADO_ID = :1"
-    print(f"Ejecutando SQL: {sql} con id_empleado = {id_empleado}")  # Depuración
-    print(f"id_empleado: {id_empleado}, tipo: {type(id_empleado)}")
-
-    try:
-        # Ejecutar la consulta
-        cursor.execute(sql, (id_empleado,))
-        
-        # Obtener todos los préstamos
-        prestamos = cursor.fetchall() 
-        print(f"Préstamos obtenidos: {prestamos}")  # Verifica el contenido
-        
-        # Convertir cada fila obtenida en una lista
-        prestamos_lista = []
-        for prestamo in prestamos:
-            prestamos_lista.append(list(prestamo))  # Convertir la tupla en lista y añadirla a la lista general
-        
-        # Depuración: Imprimir los resultados obtenidos
-        print(f"Préstamos obtenidos: {prestamos_lista}")
     
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM PRESTAMO WHERE EMPLEADO_ID = :1"
+            print(f"Ejecutando SQL: {sql} con id_empleado = {id_empleado}")
+            
+            cursor.execute(sql, (id_empleado,))
+            prestamos = cursor.fetchall()
+            print(f"Préstamos obtenidos: {prestamos}")
+
+            # Modificar la conversión para que retorne solo el ID del préstamo
+            prestamos_lista = [prestamo[0] for prestamo in prestamos]  # Solo el primer campo (ID del préstamo)
+            print(f"Préstamos obtenidos: {prestamos_lista}")
+
     except Exception as e:
-        print(f"Error al obtener préstamos: {e}")  # Manejo de errores
-        prestamos_lista = []  # Inicializar como lista vacía en caso de error
+        print(f"Error al obtener préstamos: {e}")
+        prestamos_lista = []
     finally:
-        # Cerrar el cursor y la conexión
-        cursor.close()
         connection.close()
 
-    # Devolver la lista de préstamos
     return prestamos_lista
-
-
 
 

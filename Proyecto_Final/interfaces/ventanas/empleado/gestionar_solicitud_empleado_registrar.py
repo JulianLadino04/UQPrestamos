@@ -8,6 +8,9 @@ import interfaces.ventanas.empleado.gestionar_solicitud_empleado as ge
 periodos_disponibles = ["24", "36", "48", "60", "72"]
 estados_disponibles = ["Pendiente", "Aprobado", "Rechazado"]
 
+# Obtener el ID del usuario desde el sistema
+id_usuario = proyecto.enviar_usuario_sesion()
+
 class CrearSolicitudEmpleados:
     def __init__(self):
         # Crear la ventana principal
@@ -19,11 +22,13 @@ class CrearSolicitudEmpleados:
         # Crear el frame del formulario
         form_frame = ctk.CTkFrame(self.root)
         form_frame.pack(pady=10, padx=20, fill="both", expand=True)
-
+        
         # Campo para el ID del Empleado
-        ctk.CTkLabel(form_frame, text="ID Empleado", font=("Roboto", 18)).grid(row=2, column=0, padx=10, pady=10, sticky="e")
+        ctk.CTkLabel(form_frame, text="Identificación", font=("Roboto", 18)).grid(row=2, column=0, padx=10, pady=10, sticky="e")
         self.id_empleado = ctk.CTkEntry(form_frame, width=140)
         self.id_empleado.grid(row=2, column=1, padx=10, pady=10, sticky="w")
+        self.id_empleado.insert(0, str(id_usuario[0]))  # Asignamos el ID del usuario
+        self.id_empleado.configure(state="disabled")  # Deshabilitamos para que no se pueda editar
 
         # Campo para el Monto
         ctk.CTkLabel(form_frame, text="Monto", font=("Roboto", 18)).grid(row=3, column=0, padx=10, pady=10, sticky="e")
@@ -59,7 +64,7 @@ class CrearSolicitudEmpleados:
         monto = self.monto.get()
         periodo = self.periodo.get()
 
-        if "" in [id_empleado, monto, periodo]:
+        if "" in [monto, periodo]:
             if hasattr(self, "info_create"):
                 self.info_create.destroy()
             self.info_create = ctk.CTkLabel(self.root, text="Faltan datos por llenar", text_color="red")
@@ -67,13 +72,63 @@ class CrearSolicitudEmpleados:
         else:
             if hasattr(self, "info_create"):
                 self.info_create.destroy()
+        
             # Asumiendo que proyecto tiene una función para crear una nueva solicitud
-            proyecto.crear_solicitud(datetime.now(), id_empleado, monto, periodo)
-            self.info_create = ctk.CTkLabel(self.root, text="Solicitud creada correctamente", text_color="green")
+            crear_solicitud(datetime.now(), id_empleado, monto, periodo)
+            self.info_create = ctk.CTkLabel(self.root, text="Solicitud creada correctamente, en proceso de verificación", text_color="green")
             self.info_create.pack()
             print(f"Solicitud creada: ID Empleado: {id_empleado}, Monto: {monto}, Periodo: {periodo}")
+
+def crear_solicitud(fecha_solicitud, empleado_id, monto, periodo):
+    cargo = proyecto.obtener_cargo_usuario(empleado_id)
+
+    # Definir los límites según el cargo
+    limites_prestamo = {
+        'Operario': 10000000.0,
+        'Administrativo': 15000000.0,
+        'Ejecutivo': 20000000.0,
+        'Otros': 12000000.0
+    }
+
+    # Convertir monto a float si es necesario
+    try:
+        monto = float(monto)
+    except ValueError:
+        print(f"El monto '{monto}' no es un número válido.")
+        return False  # Salir si el monto no es válido
+
+    # Verificar si el monto solicitado es mayor al permitido
+    if monto > limites_prestamo.get(cargo,float (0)):
+        proyecto.crear_solicitud(fecha_solicitud, empleado_id, monto, periodo)
+        print(f"La solicitud fue reprobada. El monto solicitado excede el límite permitido para el cargo {cargo}.")
+    else:
+        # Si el monto es válido, registrar la solicitud
+        proyecto.crear_solicitud(fecha_solicitud, empleado_id, monto, periodo)
+        print("Solicitud registrada con éxito.")
+        return True  # Retorna True indicando que la solicitud se aprobó
 
 # Función para gestionar empleados o mostrar el menú principal
 def gestionar_empleados():
     gestionar_empleados_window = ge.gestionar_solicitud_empleado()
     gestionar_empleados_window.root.mainloop()
+
+def calcular_fecha_desembolso():
+    # Obtener el mes y año actuales
+    fecha_actual = datetime.now()
+    mes_actual = fecha_actual.month
+    ano_actual = fecha_actual.year
+    
+    # Calcular el siguiente mes
+    if mes_actual == 12:
+        # Si es diciembre, el siguiente mes es enero del próximo año
+        siguiente_mes = 1
+        ano_siguiente = ano_actual + 1
+    else:
+        # Caso general, simplemente sumamos un mes
+        siguiente_mes = mes_actual + 1
+        ano_siguiente = ano_actual
+
+    # Crear la fecha para el día 3 del siguiente mes
+    fecha_desembolso = datetime(ano_siguiente, siguiente_mes, 3)
+    
+    return fecha_desembolso

@@ -14,7 +14,35 @@ def get_connection():
 
 
 ## ----------- EMPLEADO ----------- ##
+def obtener_cargo(id_usuario: str):
+    connection = get_connection()
+    cursor = connection.cursor()
+    try:
+        # Consulta para buscar el usuario por su ID_EMPLEADO
+        sql = """
+        SELECT CARGO
+        FROM EMPLEADO 
+        WHERE ID_EMPLEADO = :1
+        """
+        cursor.execute(sql, (id_usuario,))  # Asegúrate de que esto sea una tupla
 
+        # Obtener la fila completa de resultados
+        fila = cursor.fetchone()
+
+        if fila is None:
+            print(f"No se encontró ningún usuario con el ID_EMPLEADO {id_usuario}.")
+            return None
+        else: 
+            # Desempaquetar los resultados
+            return fila[0]
+
+    except Exception as e:
+        print(f"Ocurrió un error al buscar el usuario: {str(e)}")
+
+    finally:
+        cursor.close()
+        connection.close()
+    
 def crear_empleado(ID_EMPLEADO, nombre, cargo, salario, id_sucursal, nivel, usuario, contrasena):
     connection = get_connection()
     cursor = connection.cursor()

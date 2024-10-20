@@ -44,8 +44,7 @@ class gestionar_solicitud_parametrico:
                         rowheight=25,
                         fieldbackground="#2e2e2e")  # Fondo de las filas
 
-        # Crear las cabeceras de la tabla y ajustar el ancho de las columnas
-        ancho_columnas = 101
+        ancho_columnas = 88
         for col in columnas:
             self.tree.heading(col, text=col)
             self.tree.column(col, anchor=tk.CENTER, width=ancho_columnas, stretch=False)
@@ -57,23 +56,48 @@ class gestionar_solicitud_parametrico:
         # Empaquetar la tabla
         self.tree.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
 
-         # Crear un marco (frame) para organizar los botones en fila
+        # Crear un marco (frame) para organizar los botones en fila
         botones_frame = ctk.CTkFrame(self.root)
         botones_frame.pack(pady=10)
-
-        # Añadir los botones alineados en fila utilizando griwd
-        ctk.CTkButton(botones_frame, text="Editar Solicitud", command=self.enviar_solicitud).grid(row=0, column=0, padx=10)
-        ctk.CTkButton(botones_frame, text="Eliminar Solicitud", command=self.eliminar_empleado).grid(row=0, column=1, padx=10)
-        ctk.CTkButton(botones_frame, text="Crear Solicitud", command=self.ventana_creacion).grid(row=0, column=2, padx=10)
+        
+        # Ajuste: Asignar diferentes posiciones en la cuadrícula para cada botón
+        ctk.CTkButton(botones_frame, text="Aprobar", command=self.aprobar_solicitud).grid(row=0, column=0, padx=10)
+        ctk.CTkButton(botones_frame, text="Reprobar", command=self.reaprobar_solicitud).grid(row=0, column=1, padx=10)
+        ctk.CTkButton(botones_frame, text="Editar Solicitud", command=self.enviar_solicitud).grid(row=0, column=2, padx=10)
+        ctk.CTkButton(botones_frame, text="Eliminar Solicitud", command=self.eliminar_solicitud).grid(row=0, column=3, padx=10)
+        ctk.CTkButton(botones_frame, text="Crear Solicitud", command=self.ventana_creacion).grid(row=0, column=4, padx=10)
         ctk.CTkButton(self.root, text="Ir a Opciones", command=self.ir_a_opciones).pack(pady=10)
 
         self.root.mainloop()
 
-    def obtener_seleccion(self):
+    def aprobar_solicitud(self):
         selected_item = self.tree.selection()
         if selected_item:
             fila = self.tree.item(selected_item)['values']
-            print(f"Fila seleccionada: {fila}")
+            if fila[5] == 'PENDIENTE':
+                print("Se va aprobar la solicitud")
+                proyecto.editar_estado_solicitud(fila[0], 'APROBADA')
+                print (fila)
+                proyecto.crear_prestamo(fila[1],fila[2],fila[3],fila[4])
+                self.root.destroy()
+                gestionar_solicitud_parametrico()
+            else:
+                print("No se puede aprobar la solicitud")
+        else:
+            print("No se ha seleccionado ninguna fila")
+
+    def reaprobar_solicitud(self):
+        selected_item = self.tree.selection()
+        if selected_item:
+            fila = self.tree.item(selected_item)['values']
+            print(fila[5])
+            if fila[5] == 'PENDIENTE':
+                print("Se va reprobar la solicitud")
+                proyecto.editar_estado_solicitud(fila[0], 'REPROBADA')
+                self.root.destroy()
+                gestionar_solicitud_parametrico()
+            else:
+                print("No se puede reprobar la solicitud")
         else:
             print("No se ha seleccionado ninguna fila")
 
@@ -89,7 +113,7 @@ class gestionar_solicitud_parametrico:
         else:
             print("No se ha seleccionado ninguna fila")   
 
-    def eliminar_empleado(self):
+    def eliminar_solicitud(self):
         selected_item = self.tree.selection()
         if selected_item:
             fila = self.tree.item(selected_item)['values']
@@ -109,9 +133,16 @@ class gestionar_solicitud_parametrico:
         """Cerrar la ventana actual y abrir la ventana de opciones."""
         self.root.destroy()  # Cierra la ventana de gestión de empleados
         tipo_usuario = proyecto.retornar_tipo_usuario()
-        ventana_principal.Opciones(tipo_usuario)  # Llama a la ventana de opciones
-        
-    # Método de ejemplo para volver al menú principal
-    def volver_principal(self):
-        self.root.destroy()  # Cierra la ventana actual
-        gestionar_solicitud_parametrico()
+        ventana_principal.Opciones(tipo_usuario) 
+        # Llama a la ventana de opciones
+    def enviar_solicitud(self):
+        selected_item = self.tree.selection()
+        if selected_item:
+            fila = self.tree.item(selected_item)['values']
+            print(f"Fila seleccionada: {fila}")
+            edt.recibir_solicitud(fila)
+            self.root.destroy() 
+            ingresar_ventana_edicion_solicitud = edt.EditarSolicitudParametrico()
+            ingresar_ventana_edicion_solicitud.root.mainloop()
+        else:
+            print("No se ha seleccionado ninguna fila")   

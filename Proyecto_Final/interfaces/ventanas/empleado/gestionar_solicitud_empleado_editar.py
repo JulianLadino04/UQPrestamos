@@ -104,7 +104,7 @@ class EditarSolicitudEmpleados:
         id_empleado = self.id_empleado.get()
         monto = self.monto.get()
         periodo = self.periodo.get()
-        estado = self.estado.get()
+        estado = self.estado_label.get()
         tasa_interes = self.tasa_interes.get()
 
         if "" in [id_solicitud, fecha, id_empleado, monto, periodo, estado, tasa_interes]:
@@ -116,10 +116,15 @@ class EditarSolicitudEmpleados:
             if hasattr(self, "info_create"):
                 self.info_create.destroy()
             # Asumiendo que proyecto tiene una función para editar todos estos campos
-            proyecto.editar_solicitud(id_solicitud, fecha, id_empleado, monto, periodo, estado, tasa_interes)
-            self.info_create = ctk.CTkLabel(self.root, text="Datos editados correctamente", text_color="green")
-            self.info_create.pack()
-            print(f"Editando solicitud ID: {id_solicitud}, Fecha: {fecha}, ID Empleado: {id_empleado}, Monto: {monto}, Periodo: {periodo}, Estado: {estado}, Tasa de Interés: {tasa_interes}")
+            if (estado == 'PENDIENTE'):
+                proyecto.editar_solicitud(id_solicitud, monto, periodo)
+                self.info_create = ctk.CTkLabel(self.root, text="Datos editados correctamente", text_color="green")
+                self.info_create.pack()
+                print(f"Editando solicitud ID: {id_solicitud}, Fecha: {fecha}, ID Empleado: {id_empleado}, Monto: {monto}, Periodo: {periodo}, Estado: {estado}, Tasa de Interés: {tasa_interes}")
+            else:
+                self.info_create = ctk.CTkLabel(self.root, text="La solicitud no se puede editar", text_color="red")
+                self.info_create.pack()
+                
 
 # Función para gestionar empleados o mostrar el menú principal
 def gestionar_empleados():

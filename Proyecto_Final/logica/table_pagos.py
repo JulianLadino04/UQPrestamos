@@ -68,3 +68,28 @@ def mostrar_morosos():
     finally:
         cursor.close()
         connection.close()
+        
+def enviar_pagos_prestamo(id_prestamo):
+    connection = get_connection()
+    cursor = connection.cursor()
+    try:
+        sql = '''SELECT * 
+                 FROM PAGO 
+                 WHERE ID_PRESTAMO = :1'''
+        cursor.execute(sql, (id_prestamo,))
+        
+        # Obtener nombres de columnas
+        columns = [col[0] for col in cursor.description]
+        
+        # Convertir las filas a una lista de diccionarios
+        pagos = []
+        for row in cursor.fetchall():
+            pagos.append(dict(zip(columns, row)))
+        
+        return pagos  # Ahora 'pagos' es una lista de diccionarios
+    except Exception as e:
+        print(f"Error al obtener pagos: {e}")
+        return None
+    finally:
+        cursor.close()
+        connection.close()
