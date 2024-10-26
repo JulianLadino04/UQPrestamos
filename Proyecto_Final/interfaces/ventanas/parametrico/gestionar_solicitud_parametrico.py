@@ -113,16 +113,25 @@ class gestionar_solicitud_parametrico:
         else:
             print("No se ha seleccionado ninguna fila")   
 
-    def eliminar_solicitud(self):
+    def obtener_seleccion(self):
         selected_item = self.tree.selection()
         if selected_item:
             fila = self.tree.item(selected_item)['values']
             print(f"Fila seleccionada: {fila}")
-            self.root.destroy()
-            proyecto.eliminar_solicitud(fila)
-            gestionar_solicitud_parametrico()
+            return fila
         else:
-            print("No se ha seleccionado ninguna fila")   
+            print("No se ha seleccionado ninguna fila")
+            return None
+        
+    def eliminar_solicitud(self):
+        fila = self.obtener_seleccion()
+        if fila and fila[5] == 'PENDIENTE':
+            proyecto.eliminar_solicitud(fila)
+            self.root.destroy()
+            gestionar_solicitud_parametrico()  # Reinicia la ventana
+        else:
+            print("No se puede eliminar la solicitud debido a que ya fue ajustada o no se ha seleccionado ninguna fila.")
+
             
     def ventana_creacion(self):
         self.root.destroy() 

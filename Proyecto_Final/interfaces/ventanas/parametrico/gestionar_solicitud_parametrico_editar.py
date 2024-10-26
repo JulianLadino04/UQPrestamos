@@ -6,7 +6,7 @@ import interfaces.ventanas.parametrico.gestionar_solicitud_parametrico as ge
 
 # Valores predefinidos para el periodo y el estado
 periodos_disponibles = ["24", "36", "48", "60", "72"]
-estados_disponibles = ["Aprobado", "Rechazado"]
+estados_disponibles = ["APROBADA", "REPROBADA", "PENDIENTE"]
 
 # Datos globales que serán recibidos
 datos = []
@@ -55,14 +55,12 @@ class EditarSolicitudParametrico:
         self.monto = ctk.CTkEntry(form_frame, width=140)
         self.monto.grid(row=3, column=1, padx=10, pady=10, sticky="w")
         self.monto.insert(0, datos[3])  # Suponiendo que el monto está en datos[3]
-        self.monto.configure(state="disabled")
 
         # Campo para el Periodo (usando OptionMenu)
-        ctk.CTkLabel(form_frame, text="Periodo", font=("Roboto", 18)).grid(row=3, column=0, padx=10, pady=10, sticky="e")
-        self.periodo = ctk.CTkEntry(form_frame, width=140)
-        self.periodo.grid(row=3, column=1, padx=10, pady=10, sticky="w")
-        self.periodo.insert(0, datos[4])  # Suponiendo que el monto está en datos[3]
-        self.periodo.configure(state="disabled")
+        ctk.CTkLabel(form_frame, text="Periodo", font=("Roboto", 18)).grid(row=4, column=0, padx=10, pady=10, sticky="e")
+        self.periodo = tk.StringVar()
+        ctk.CTkOptionMenu(form_frame, variable=self.periodo, values=periodos_disponibles).grid(row=4, column=1, padx=10, pady=10, sticky="w")
+        self.periodo.set(datos[4])  # Suponiendo que el periodo está en datos[4]
 
         # Campo para el Estado (usando Entry deshabilitado en lugar de OptionMenu)
         ctk.CTkLabel(form_frame, text="Estado", font=("Roboto", 18)).grid(row=5, column=0, padx=10, pady=10, sticky="e")
@@ -74,8 +72,7 @@ class EditarSolicitudParametrico:
         ctk.CTkLabel(form_frame, text="Tasa de Interés", font=("Roboto", 18)).grid(row=6, column=0, padx=10, pady=10, sticky="e")
         self.tasa_interes = ctk.CTkEntry(form_frame, width=140)
         self.tasa_interes.grid(row=6, column=1, padx=10, pady=10, sticky="w")
-        self.tasa_interes.insert(0, datos[6])  # Suponiendo que la tasa de interés está en datos[6]
-        self.tasa_interes.configure(state="disabled")
+        self.tasa_interes.insert(0, datos[6]) 
 
         # Botón para guardar los cambios
         ctk.CTkButton(self.root, text="Guardar Cambios", command=self.validar_campos).pack(pady=20)
@@ -111,20 +108,27 @@ class EditarSolicitudParametrico:
             self.info_create = ctk.CTkLabel(self.root, text="Faltan datos por llenar", text_color="red")
             self.info_create.pack()
         else:
-            if hasattr(self, "info_create"):
-                self.info_create.destroy()
-            if (estado == "Aprobado"):
-                 # Asumiendo que proyecto tiene una función para editar todos estos campos
-                proyecto.crear_prestamo_solicitud(id_solicitud, datetime.now(), id_empleado, monto, periodo, estado, tasa_interes, datetime.now() + timedelta(days=10))
-                proyecto.eliminar_solicitud(id_solicitud)
-                self.info_create = ctk.CTkLabel(self.root, text="Prestamo aprobado correctamente", text_color="green")
+            if ("REPROBADA" == datos[5]):
+                if hasattr(self, "info_create"):
+                    self.info_create.destroy()
+                self.info_create = ctk.CTkLabel(self.root, text="Las solicitudes reprobadas no pueden ser editadas", text_color="red")
                 self.info_create.pack()
-                print(f"Creando Prestamo ID: {id_solicitud}, Fecha: {fecha}, ID Empleado: {id_empleado}, Monto: {monto}, Periodo: {periodo}, Estado: {estado}, Tasa de Interés: {tasa_interes}")
-
             else:
-                proyecto.eliminar_solicitud(id_solicitud)
-                self.info_create = ctk.CTkLabel(self.root, text="Solicitud Rechazada", text_color="green")
-                self.info_create.pack()
+                if (estado == 'APROBADA'):
+                    if hasattr(self, "info_create"):
+                        self.info_create.destroy()
+                    proyecto.crear_prestamo_solicitud(id_solicitud, datetime.now(), id_empleado, monto, periodo, estado, tasa_interes, datetime.now() + timedelta(days=10))
+                    proyecto.eliminar_solicitud(id_solicitud)
+                    self.info_create = ctk.CTkLabel(self.root, text="Solicitud editada correctamente", text_color="green")
+                    self.info_create.pack()
+                    print(f"Creando Prestamo ID: {id_solicitud}, Fecha: {fecha}, ID Empleado: {id_empleado}, Monto: {monto}, Periodo: {periodo}, Estado: {estado}, Tasa de Interés: {tasa_interes}")
+            
+                if (estado == 'PENDIENTE'):
+                    if hasattr(self, "info_create"):
+                        self.info_create.destroy()
+                    proyecto.editar_estado_solicitud(id_solicitud, 'PENDIENTE')
+                    self.info_create = ctk.CTkLabel(self.root, text="Solicitud editada correctamente", text_color="green")
+                    self.info_create.pack()
 
 
 # Función para gestionar empleados o mostrar el menú principal

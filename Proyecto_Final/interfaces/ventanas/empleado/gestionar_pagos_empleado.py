@@ -6,7 +6,6 @@ import logica.proyecto as proyecto
 import interfaces.GUI as ventana_principal
 import interfaces.ventanas.empleado.gestionar_solicitud_empleado as ge
 
-
 class gestionar_pagos_empleado:
     def __init__(self):
         self.root = ctk.CTk()
@@ -18,21 +17,31 @@ class gestionar_pagos_empleado:
         ctk.CTkLabel(master=self.root, text="Vista de pagos de Empleado", font=("Roboto", 36)).grid(row=0, column=0, columnspan=2, pady=15)
 
         # Crear variable para almacenar el préstamo seleccionado
-        self.prestamo = tk.StringVar(value="Seleccione un préstamo")  # Inicializar la variable
+        self.prestamo = tk.StringVar(value="Seleccione un préstamo")
 
-        # Obtener los pagos del cliente
-        pagos_cliente = proyecto.obtener_pagos_cliente(proyecto.enviar_id_usuario())  # Obtener los pagos del cliente
-        print(f"Pagos Prestamo del cliente: {pagos_cliente}")  # Depuración
+        # Obtener los préstamos del cliente
+        prestamos_cliente = proyecto.enviar_prestamos_cliente_pendientes()
+        print(f"Préstamos del cliente: {prestamos_cliente}")
 
-        # Ajustar aquí según el formato retornado
-        if isinstance(pagos_cliente, list) and all(isinstance(p, tuple) and len(p) == 4 for p in pagos_cliente):
-            prestamos_cliente_str = [str(prestamo[0]) for prestamo in pagos_cliente]  # Usar el ID_PRESTAMO para el menú
+        # Preparar los IDs de préstamos para el OptionMenu con la verificación mejorada
+        prestamos_cliente_str = []
+        if isinstance(prestamos_cliente, list) and all(isinstance(p, (tuple, int)) for p in prestamos_cliente):
+            prestamos_cliente_str = [str(prestamo[0] if isinstance(prestamo, tuple) else prestamo) for prestamo in prestamos_cliente]
         else:
-            print("Error: El formato de pagos no es el esperado.")
-            prestamos_cliente_str = []
+            print("Error: El formato de préstamos no es el esperado.")
+        
+        # Comprobar si hay datos antes de configurar el OptionMenu
+        if not prestamos_cliente_str:
+            prestamos_cliente_str = ["No hay préstamos disponibles"]
 
         # Menú desplegable para seleccionar el préstamo
-        ctk.CTkOptionMenu(master=self.root, variable=self.prestamo, values=prestamos_cliente_str, command=self.cargar_pagos).grid(row=1, column=1, padx=10, pady=10, sticky="w")
+        self.option_menu = ctk.CTkOptionMenu(
+            master=self.root,
+            variable=self.prestamo,
+            values=prestamos_cliente_str,
+            command=self.cargar_pagos  # Llamada a cargar pagos cada vez que se selecciona un préstamo
+        )
+        self.option_menu.grid(row=1, column=1, padx=10, pady=10, sticky="w")
 
         # Crear la tabla (Treeview) vacía al inicio
         self.tree = ttk.Treeview(self.root, columns=("ID_Prestamo", "Valor_Pago", "Moroso", "Numero_Cuota"), show="headings", height=10)
@@ -55,46 +64,44 @@ class gestionar_pagos_empleado:
 
         self.root.mainloop()
 
-    def cargar_pagos(self, *args):
-        """Cargar todos los pagos del empleado y actualizar la tabla."""
+    def cargar_pagos(self, selected_prestamo):
+        """Cargar los pagos asociados al préstamo seleccionado y actualizar la tabla."""
         try:
-            # Obtener el ID del empleado
-            id_empleado = proyecto.enviar_id_usuario()  # Asumiendo que esta función devuelve el ID del empleado actual
-            pagos = proyecto.obtener_pagos_cliente(id_empleado)
-
-            # Imprimir los pagos obtenidos
-            print(f"Pagos obtenidos para el empleado {id_empleado}: {pagos}")
-
-            if pagos is None or len(pagos) == 0:
-                print(f"No se encontraron pagos para el empleado: {id_empleado}")
+            # Verificar que se ha seleccionado un préstamo válido
+            if selected_prestamo == "Seleccione un préstamo" or selected_prestamo == "No hay préstamos disponibles":
+                print("No se ha seleccionado un préstamo válido.")
                 return
 
+            # Obtener los pagos para el préstamo seleccionado
+            pagos = proyecto.obtener_pagos_prestamos(selected_prestamo)
+            print(f"Pagos obtenidos para el préstamo {selected_prestamo}: {pagos}")
+
+            # Limpiar la tabla antes de insertar los nuevos datos
             self.tree.delete(*self.tree.get_children())
 
-            # Configurar las columnas del Treeview
+            # Configurar las columnas del Treeview si no se han configurado
             columnas = ["ID_Prestamo", "Valor_Pago", "Moroso", "Numero_Cuota"]
-            print(f"Columnas para la tabla: {columnas}")
-
             for col in columnas:
                 self.tree.heading(col, text=col)
                 self.tree.column(col, anchor=tk.CENTER, width=120, stretch=False)
 
+            # Insertar los pagos obtenidos en la tabla
             for pago in pagos:
                 self.tree.insert('', tk.END, values=pago)
 
         except Exception as e:
-            print(f"Error al obtener pagos del empleado: {e}")
+            print(f"Error al cargar los pagos para el préstamo {selected_prestamo}: {e}")
 
     def obtener_seleccion(self):
-        selected_prestamo = self.prestamo.get()  # Obtener el valor seleccionado del OptionMenu
-        if selected_prestamo:
-            print(f"Préstamo seleccionado: {selected_prestamo}")
+        selected_prestamo = self.prestamo.get()
+        if selected_prestamo and selected_prestamo != "Seleccione un préstamo" and selected_prestamo != "No hay préstamos disponibles":
+            print(f"Préstamo seleccionado para pago: {selected_prestamo}")
             # Abrir la ventana para realizar el pago y pasar el ID del préstamo seleccionado
             self.root.destroy()
             realizar_pago_prestamo = RealizarPagoPrestamo(selected_prestamo)
             realizar_pago_prestamo.root.mainloop()
         else:
-            print("No se ha seleccionado ningún préstamo")
+            print("No se ha seleccionado ningún préstamo válido")
     
     def ir_a_opciones(self):
         self.root.destroy()

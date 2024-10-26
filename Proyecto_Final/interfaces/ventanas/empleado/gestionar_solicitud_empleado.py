@@ -1,16 +1,13 @@
 import customtkinter as ctk
-import os
+import tkinter as tk
+from tkinter import ttk
 import logica.proyecto as proyecto
 import interfaces.GUI as ventana_principal
-from PIL import Image
-from tkinter import ttk
-import tkinter as tk
 import interfaces.ventanas.empleado.gestionar_solicitud_empleado_registrar as reg
 import interfaces.ventanas.empleado.gestionar_solicitud_empleado_editar as edt
 
 # Clase para gestionar la solicitud de empleado
-
-class gestionar_solicitud_empleado:
+class GestionarSolicitudEmpleado:
     def __init__(self):
         self.root = ctk.CTk()
         self.root.title("Solicitud Empleado")
@@ -20,28 +17,30 @@ class gestionar_solicitud_empleado:
         ctk.CTkLabel(master=self.root, text="Vista de solicitudes de Empleado", font=("Roboto", 36)).pack(pady=15)
 
         # Obtener el ID del usuario
-        id_usuario = proyecto.enviar_usuario_sesion()
-        print("ID DEL USUARIO: " , id_usuario[0])
+        id_usuario = proyecto.enviar_usuario_sesion()[0]
+        print("ID DEL USUARIO: ", id_usuario)
+
         # Configurar la conexión a Oracle y obtener las solicitudes
-        self.solicitudes = self.obtener_solicitudes(id_usuario[0])
+        self.solicitudes = self.obtener_solicitudes(id_usuario)
 
         # Crear la tabla (Treeview) en la ventana
         self.tree = self.crear_tabla(self.solicitudes)
-
-        # Empaquetar la tabla
         self.tree.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
 
         # Crear un marco (frame) para organizar los botones en fila
+        self.crear_botones()
+
+        self.root.mainloop()
+
+    def crear_botones(self):
         botones_frame = ctk.CTkFrame(self.root)
         botones_frame.pack(pady=10)
 
-        # Añadir los botones alineados en fila utilizando grid
-        ctk.CTkButton(botones_frame, text="Editar Solicitud", command=self.enviar_empleado).grid(row=0, column=0, padx=10)
-        ctk.CTkButton(botones_frame, text="Eliminar Solicitud", command=self.eliminar_empleado).grid(row=0, column=1, padx=10)
+        # Añadir botones
+        ctk.CTkButton(botones_frame, text="Editar Solicitud", command=self.editar_solicitud).grid(row=0, column=0, padx=10)
+        ctk.CTkButton(botones_frame, text="Eliminar Solicitud", command=self.eliminar_solicitud).grid(row=0, column=1, padx=10)
         ctk.CTkButton(botones_frame, text="Crear Solicitud", command=self.ventana_creacion).grid(row=0, column=2, padx=10)
         ctk.CTkButton(self.root, text="Ir a Opciones", command=self.ir_a_opciones).pack(pady=10)
-
-        self.root.mainloop()
 
     def obtener_solicitudes(self, id_usuario):
         try:
@@ -50,7 +49,7 @@ class gestionar_solicitud_empleado:
                     cursor.execute("SELECT * FROM SOLICITUD WHERE ID_EMPLEADO = :1", (id_usuario,))
                     columnas = [desc[0] for desc in cursor.description]
                     filas = cursor.fetchall()
-                    
+
                     if not filas:
                         print("No se encontraron solicitudes para el empleado.")
                     
@@ -83,50 +82,41 @@ class gestionar_solicitud_empleado:
             tree.insert('', tk.END, values=fila)
 
         return tree
-    
+
     def obtener_seleccion(self):
         selected_item = self.tree.selection()
         if selected_item:
             fila = self.tree.item(selected_item)['values']
             print(f"Fila seleccionada: {fila}")
+            return fila
         else:
             print("No se ha seleccionado ninguna fila")
+            return None
 
-    def enviar_empleado(self):
-        selected_item = self.tree.selection()
-        if selected_item:
-            fila = self.tree.item(selected_item)['values']
-            print(f"Fila seleccionada: {fila}")
+    def editar_solicitud(self):
+        fila = self.obtener_seleccion()
+        if fila and fila[5] == 'PENDIENTE':
             edt.recibir_solicitud(fila)
             self.root.destroy() 
-            ingresar_ventana_edicion_solicitud = edt.EditarSolicitudEmpleados()
-            ingresar_ventana_edicion_solicitud.root.mainloop()
+            edt.EditarSolicitudEmpleados().root.mainloop()
         else:
-            print("No se ha seleccionado ninguna fila")   
+            print("No se puede editar la solicitud debido a que ya fue ajustada o no se ha seleccionado ninguna fila.")
 
-    def eliminar_empleado(self):
-        selected_item = self.tree.selection()
-        if selected_item:
-            fila = self.tree.item(selected_item)['values']
-            print(f"Fila seleccionada: {fila}")
-            self.root.destroy()
+    def eliminar_solicitud(self):
+        fila = self.obtener_seleccion()
+        if fila and fila[5] == 'PENDIENTE':
             proyecto.eliminar_solicitud(fila)
-            gestionar_solicitud_empleado()
+            self.root.destroy()
+            GestionarSolicitudEmpleado()  # Reinicia la ventana
         else:
-            print("No se ha seleccionado ninguna fila")   
-            
+            print("No se puede eliminar la solicitud debido a que ya fue ajustada o no se ha seleccionado ninguna fila.")
+
     def ventana_creacion(self):
         self.root.destroy() 
-        ingresar_ventana_creacion_solicitud = reg.CrearSolicitudEmpleados()
-        ingresar_ventana_creacion_solicitud.root.mainloop()    
+        reg.CrearSolicitudEmpleados().root.mainloop()
 
     def ir_a_opciones(self):
         """Cerrar la ventana actual y abrir la ventana de opciones."""
-        self.root.destroy()  # Cierra la ventana de gestión de empleados
+        self.root.destroy()  
         tipo_usuario = proyecto.retornar_tipo_usuario() + ""
         ventana_principal.Opciones(tipo_usuario)  # Llama a la ventana de opciones
-        
-    # Método de ejemplo para volver al menú principal
-    def volver_principal(self):
-        self.root.destroy()  # Cierra la ventana actual
-        gestionar_solicitud_empleado()

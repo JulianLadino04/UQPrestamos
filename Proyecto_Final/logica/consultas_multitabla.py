@@ -35,3 +35,24 @@ def obtener_pagos_cliente(id):
     finally:
         cursor.close()
         connection.close()
+
+def obtener_pagos_prestamo(id_prestamo):
+    connection = get_connection()
+    cursor = connection.cursor()
+    try:
+        sql = '''SELECT a.ID_PRESTAMO, a.VALOR_PAGO, a.MOROSO, a.NUMERO_CUOTA
+                 FROM PAGO a
+                 WHERE a.ID_PRESTAMO = :1'''  # Filtra por ID_PRESTAMO
+        
+        cursor.execute(sql, (id_prestamo,))
+        resultados = cursor.fetchall()  # Devuelve todos los resultados
+
+        # Retorna solo los valores necesarios para la tabla
+        return [(pago[0], pago[1], pago[2], pago[3]) for pago in resultados]  # (ID_PRESTAMO, VALOR_PAGO, MOROSO, NUMERO_CUOTA)
+
+    except Exception as e:
+        print(f"Error al obtener los pagos para el préstamo con ID {id_prestamo}: {e}")
+        return None
+    finally:
+        cursor.close()
+        connection.close()

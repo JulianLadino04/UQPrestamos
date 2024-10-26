@@ -132,8 +132,8 @@ def eliminar_sucursal(fila):
 def crear_solicitud(fecha_solicitud, empleado_id, monto, periodo):
     solicitudes.registrar_solicitud(fecha_solicitud, empleado_id, monto, periodo)
 
-def editar_solicitud(id_solicitud, monto, periodo):
-    solicitudes.update_solicitud(id_solicitud, monto, periodo)
+def editar_solicitud(id_empleado, id_solicitud, monto, periodo):
+    solicitudes.update_solicitud(id_empleado, id_solicitud, monto, periodo)
 
 def eliminar_solicitud(elementos):
     identificacion = elementos[0]
@@ -160,13 +160,6 @@ def obtener_historial_prestamos(empleado_id):
         print(f"Error al obtener historial de préstamos: {e}")
         return []
 
-# Funciones de ingresos
-def funciones_ingresos():
-    ingreso.create_ingreso(1, datetime.now(), datetime.now())
-    ingreso.create_ingreso(2, datetime.now(), datetime.now()) 
-    ingreso.read_ingreso()
-    ingreso.delete_ingreso(1)
-
 # Manejo de la sesión del usuario
 def hora_ingreso_usuario():
     global usuario_sistema
@@ -186,7 +179,6 @@ def ingresar_ingreso_sistema():
 
 def retornar_tipo_usuario():
     tipo = usuarios.obtener_tipo_user_ID(usuario_sistema[0])
-    usuario_sistema.clear()
     return tipo
 
 def obtener_tasa_interes(periodo):
@@ -195,6 +187,10 @@ def obtener_tasa_interes(periodo):
 def enviar_prestamos_cliente():
     prestamos_cliente = prestamos.read_prestamos(id_usuario_sesion) 
     return prestamos_cliente
+
+def enviar_prestamos_cliente_pendientes():
+    prestamos_cliente = prestamos.read_prestamos_pendientes(id_usuario_sesion) 
+    return prestamos_cliente
    
 def enviar_pagos_prestamo(prestamo_seleccionado):
     return pagos.enviar_pagos_prestamo(prestamo_seleccionado)
@@ -202,5 +198,21 @@ def enviar_pagos_prestamo(prestamo_seleccionado):
 def obtener_pagos_cliente(id_usuario_sesion):
     return consulta_multitabla.obtener_pagos_cliente(id_usuario_sesion)
 
+def obtener_pagos_prestamos(id_solicitud):
+    return consulta_multitabla.obtener_pagos_prestamo(id_solicitud)
+
 def editar_estado_solicitud(solicitud, estado):
     solicitudes.update_estado_solicitud(solicitud, estado)
+    
+def obtener_cuota_prestamo(id_prestamo):
+    return prestamos.obtener_cuota_prestamo(id_prestamo)
+
+def obtener_cuotas_prestamo(id_prestamo):
+    return prestamos.obtener_cantidad_cuotas_prestamo(id_prestamo)
+
+def pagar_prestamo(numero_prestamo, numero_pago, fecha_pago, valor):
+    pagos.registrar_pago(numero_prestamo, numero_pago, fecha_pago, valor)
+    
+def pagar_prestamo_ultimo(numero_prestamo, numero_pago, fecha_pago, valor):
+    pagos.registrar_pago(numero_prestamo, numero_pago, fecha_pago, valor)
+    prestamos.prestamo_finalizado(numero_prestamo)

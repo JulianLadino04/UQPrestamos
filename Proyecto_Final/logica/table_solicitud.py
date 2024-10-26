@@ -133,7 +133,7 @@ def actualizar_solicitud(id_solicitud, nuevo_estado):
     
     try:
         # Validar que el nuevo estado esté dentro de los valores permitidos
-        estados_permitidos = ['Pendiente', 'En estudio', 'Aprobada', 'Rechazada']
+        estados_permitidos = ['PENDIENTE', 'EN ESTUDIO', 'APROBADA', 'RECHAZADA']
         if nuevo_estado not in estados_permitidos:
             raise ValueError(f"Estado '{nuevo_estado}' no permitido. Solo se permiten: {estados_permitidos}")
         
@@ -218,14 +218,53 @@ def mostrar_solicitudes():
         cursor.close()
         connection.close()
 
-def update_solicitud(solicitud_id, monto, periodo):
-    connection = get_connection()
-    cursor = connection.cursor()
-    sql = "UPDATE SOLICITUD SET MONTO_SOLICITADO = :1, PERIODO_MESES = :2 WHERE ID_SOLICITUD = :3"
-    cursor.execute(sql, (monto, periodo, solicitud_id))
-    connection.commit()
-    cursor.close()
-    connection.close()
+def update_solicitud(id_empleado, solicitud_id, monto, periodo):
+    estado_solicitud = 'PENDIENTE'
+    connection = None
+    cursor = None
+    
+    try:
+        # Establecer la conexión y el cursor
+        connection = get_connection()
+        cursor = connection.cursor()
+        
+        # Validar el monto y actualizar el estado si es necesario
+        if not validar_monto(id_empleado, monto):
+            estado_solicitud = 'REPROBADA'
+            print("La solicitud fue reprobada. El monto solicitado excede el límite permitido para el cargo.")
+        
+        # Convertir periodo a entero
+        periodo = int(periodo)
+
+        # Obtener la tasa de interés
+        tasa_interes = proyecto.obtener_tasa_interes(periodo)
+        print(f"Tasa de interés asignada: {tasa_interes}%")
+        
+        # Actualizar los datos en la tabla SOLICITUD
+        sql = """
+            UPDATE SOLICITUD
+            SET MONTO_SOLICITADO = :1,
+                PERIODO_MESES = :2,
+                ESTADO = :3
+            WHERE ID_SOLICITUD = :4
+        """
+        cursor.execute(sql, (monto, periodo, estado_solicitud, solicitud_id))
+        
+        # Confirmar los cambios en la base de datos
+        connection.commit()
+        print("Solicitud actualizada correctamente.")
+        
+    except ValueError as e:
+        print(f"Error de valor: {e}")
+    except Exception as e:
+        print(f"Error al actualizar la solicitud: {e}")
+    finally:
+        # Cerrar cursor y conexión si fueron abiertos
+        if cursor is not None:
+            cursor.close()
+        if connection is not None:
+            connection.close()
+
 
 def update_estado_solicitud(solicitud_id, estado):
     connection = get_connection()

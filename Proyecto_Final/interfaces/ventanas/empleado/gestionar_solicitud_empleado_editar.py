@@ -5,7 +5,7 @@ import interfaces.ventanas.empleado.gestionar_solicitud_empleado as ge
 
 # Valores predefinidos para el periodo y el estado
 periodos_disponibles = ["24", "36", "48", "60", "72"]
-estados_disponibles = ["Pendiente", "Aprobado", "Rechazado"]
+estados_disponibles = ["PENDIENTE", "APROBADO", "RECHAZADO"]
 
 # Datos globales que serán recibidos
 datos = []
@@ -95,7 +95,7 @@ class EditarSolicitudEmpleados:
     # Método para volver al menú principal
     def volver_principal(self):
         self.root.destroy()
-        ingresar_ventana_solicitud = ge.gestionar_solicitud_empleado()
+        ingresar_ventana_solicitud = ge.GestionarSolicitudEmpleado()
         ingresar_ventana_solicitud.root.mainloop()
 
     def validar_campos(self):
@@ -117,7 +117,7 @@ class EditarSolicitudEmpleados:
                 self.info_create.destroy()
             # Asumiendo que proyecto tiene una función para editar todos estos campos
             if (estado == 'PENDIENTE'):
-                proyecto.editar_solicitud(id_solicitud, monto, periodo)
+                proyecto.editar_solicitud(datos[2], id_solicitud, monto, periodo)
                 self.info_create = ctk.CTkLabel(self.root, text="Datos editados correctamente", text_color="green")
                 self.info_create.pack()
                 print(f"Editando solicitud ID: {id_solicitud}, Fecha: {fecha}, ID Empleado: {id_empleado}, Monto: {monto}, Periodo: {periodo}, Estado: {estado}, Tasa de Interés: {tasa_interes}")

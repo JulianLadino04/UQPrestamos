@@ -202,7 +202,7 @@ def read_prestamos(id_empleado):
     
     try:
         with connection.cursor() as cursor:
-            sql = "SELECT * FROM PRESTAMO WHERE EMPLEADO_ID = :1"
+            sql = "SELECT * FROM PRESTAMO WHERE EMPLEADO_ID = :1 "
             print(f"Ejecutando SQL: {sql} con id_empleado = {id_empleado}")
             
             cursor.execute(sql, (id_empleado,))
@@ -221,4 +221,95 @@ def read_prestamos(id_empleado):
 
     return prestamos_lista
 
+def read_prestamos_pendientes(id_empleado):
+    if not id_empleado:
+        print("Error: id_empleado está vacío. No se puede ejecutar la consulta.")
+        return []
 
+    connection = get_connection()
+    
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM PRESTAMO WHERE EMPLEADO_ID = :1 AND ESTADO = 'APROBADA'"
+            print(f"Ejecutando SQL: {sql} con id_empleado = {id_empleado}")
+            
+            cursor.execute(sql, (id_empleado,))
+            prestamos = cursor.fetchall()
+            print(f"Préstamos obtenidos: {prestamos}")
+
+            # Modificar la conversión para que retorne solo el ID del préstamo
+            prestamos_lista = [prestamo[0] for prestamo in prestamos]  # Solo el primer campo (ID del préstamo)
+            print(f"IDs de préstamos obtenidos: {prestamos_lista}")
+
+    except Exception as e:
+        print(f"Error al obtener préstamos: {e}")
+        prestamos_lista = []
+    finally:
+        connection.close()
+
+    return prestamos_lista  # Devuelve la lista de préstamos
+
+def obtener_cuota_prestamo (id_prestamo):
+    if not id_prestamo:
+        print("Error: id_prestamo está vacío. No se puede ejecutar la consulta.")
+        return []
+
+    connection = get_connection()
+    
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT VALOR_CUOTA FROM PRESTAMO WHERE ID_PRESTAMO    = :1"
+        
+            cursor.execute(sql, (id_prestamo,))
+            prestamos = cursor.fetchall()
+            print(f"Valor Cuota préstamos obtenidos: {prestamos}")
+
+            # Modificar la conversión para que retorne solo el ID del préstamo
+            valor_cuota = prestamos[0] # Solo el primer campo (ID del préstamo)
+            print(f"valor cuota obtenido: {valor_cuota}")
+
+    except Exception as e:
+        print(f"Error al obtener préstamos: {e}")
+        prestamos_lista = []
+    finally:
+        connection.close()
+
+    return valor_cuota
+
+def obtener_cantidad_cuotas_prestamo(id_prestamo):
+    if not id_prestamo:
+        print("Error: id_prestamo está vacío. No se puede ejecutar la consulta.")
+        return 0  # Retornar 0 o un valor por defecto en caso de error
+
+    connection = get_connection()
+    
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT PERIODO FROM PRESTAMO WHERE ID_PRESTAMO = :1"
+        
+            cursor.execute(sql, (id_prestamo,))
+            prestamos = cursor.fetchall()
+            print(f"Numero de cuotas obtenidos: {prestamos}")
+
+            if prestamos:  # Verifica si se obtuvo algún resultado
+                numero_cuotas = prestamos[0][0]  # Acceder al primer elemento de la primera tupla
+                print(f"Numero de cuotas obtenidos: {numero_cuotas}")
+            else:
+                numero_cuotas = 0  # Si no hay resultados, retorna 0 o un valor por defecto
+
+    except Exception as e:
+        print(f"Error al obtener préstamos: {e}")
+        numero_cuotas = 0  # Retornar 0 en caso de excepción
+    finally:
+        connection.close()
+
+    return numero_cuotas  # Asegúrate de retornar solo el número de cuotas
+
+def prestamo_finalizado(id_prestamo):
+    connection = get_connection()
+    cursor = connection.cursor()
+    sql = "UPDATE PRESTAMO SET ESTADO = :1  WHERE ID_PRESTAMO = :2"
+    cursor.execute(sql, ('PAGADO',id_prestamo))
+    connection.commit()
+    cursor.close()
+    connection.close()

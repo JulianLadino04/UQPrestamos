@@ -12,7 +12,6 @@ import interfaces.ventanas.empleado.gestionar_estado_empleado as gee
 
 import interfaces.ventanas.parametrico.consulta_multitabla_parametrico as cmp
 import interfaces.ventanas.parametrico.gestionar_pagos_parametrico as gpp
-import interfaces.ventanas.parametrico.gestionar_prestamos_parametrico as gprp
 import interfaces.ventanas.parametrico.gestionar_solicitud_parametrico as gsp
 import interfaces.ventanas.parametrico.ver_reportes_parametrico as vrp
 
@@ -159,7 +158,7 @@ def historial_solicitudes():
 
 # FUNCIONES BOTONES USUARIO EMPLEADO
 def gestionar_solicitud_empleado():
-    gestionar_solicitud_empleado_window = gse.gestionar_solicitud_empleado()
+    gestionar_solicitud_empleado_window = gse.GestionarSolicitudEmpleado()
     gestionar_solicitud_empleado_window.root.mainloop()
 
 def gestionar_pagos_empleado():
@@ -175,7 +174,7 @@ botones_administrador = ['Gestionar Usuarios', 'Gestionar Sucursales', 'Gestiona
                          'Gestionar Prestamos', 'Gestionar Pagos', 'Visualizar Ingresos',
                          'Ver Reportes', 'Historial Prestamos']
 
-botones_parametrico = ['Gestionar Solicitudes', 'Gestionar Prestamos', 'Gestionar Pagos','Ver Reportes']
+botones_parametrico = ['Gestionar Solicitudes', 'Gestionar Pagos']
 
 botones_empleado = ['Gestionar Solicitudes', 'Gestionar Pagos']
 
@@ -184,8 +183,7 @@ funciones_botones_administrador = [gestionar_usuarios,gestionar_sucursales, gest
                                    gestionar_solicitudes, gestionar_prestamos, gestionar_pagos,
                                    visualizar_ingresos, ver_reportes, historial_solicitudes]
 
-funciones_botones_parametrico = [gestionar_solicitud_parametrico, gestionar_prestamos_parametrico,
-                                 gestionar_pagos_parametrico, ver_reportes_parametrico]
+funciones_botones_parametrico = [gestionar_solicitud_parametrico,gestionar_pagos_parametrico]
 
 funciones_botones_empleado = [gestionar_solicitud_empleado, gestionar_pagos_empleado]
 
