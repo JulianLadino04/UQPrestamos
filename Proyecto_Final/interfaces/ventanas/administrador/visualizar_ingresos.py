@@ -56,12 +56,6 @@ class visualizar_ingresos:
 # Crear un marco (frame) para organizar los botones en fila
         botones_frame = ctk.CTkFrame(self.root)
         botones_frame.pack(pady=10)
-
-        # Añadir los botones alineados en fila utilizando grid
-        ctk.CTkButton(botones_frame, text="Editar Ingreso", command=self.obtener_seleccion).grid(row=0, column=0, padx=10)
-        ctk.CTkButton(botones_frame, text="Eliminar Ingreso", command=self.obtener_seleccion).grid(row=0, column=1, padx=10)
-        ctk.CTkButton(botones_frame, text="Crear Ingresp", command=self.obtener_seleccion).grid(row=0, column=2, padx=10)
-# Botón para ir a la ventana de opciones
         ctk.CTkButton(self.root, text="Ir a Opciones", command=self.ir_a_opciones).pack(pady=10)
 
         self.root.mainloop()

@@ -2,9 +2,9 @@ import customtkinter as ctk
 import tkinter as tk
 import logica.proyecto as proyecto
 from datetime import datetime
-import interfaces.ventanas.empleado.gestionar_solicitud_empleado as ge
+import interfaces.ventanas.parametrico.gestionar_solicitud_parametrico as gsp
 
-class RealizarPagoPrestamo:
+class RealizarPagoParametricoPrestamo:
     def __init__(self, id_prestamo_seleccionado):
         self.root = ctk.CTk()
         self.root.title("Pago de préstamo")
@@ -105,5 +105,5 @@ class RealizarPagoPrestamo:
 
     def volver_principal(self):
         self.root.destroy()
-        ingresar_ventana_solicitud = ge.gestionar_solicitud_empleado()
+        ingresar_ventana_solicitud = gsp.gestionar_solicitud_parametrico()
         ingresar_ventana_solicitud.root.mainloop()

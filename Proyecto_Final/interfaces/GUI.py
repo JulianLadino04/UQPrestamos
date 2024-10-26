@@ -9,12 +9,8 @@ import tkinter as tk
 import interfaces.ventanas.empleado.gestionar_solicitud_empleado as gse
 import interfaces.ventanas.empleado.gestionar_pagos_empleado as gpe
 import interfaces.ventanas.empleado.gestionar_estado_empleado as gee
-
-import interfaces.ventanas.parametrico.consulta_multitabla_parametrico as cmp
 import interfaces.ventanas.parametrico.gestionar_pagos_parametrico as gpp
 import interfaces.ventanas.parametrico.gestionar_solicitud_parametrico as gsp
-import interfaces.ventanas.parametrico.ver_reportes_parametrico as vrp
-
 import interfaces.ventanas.administrador.gestionar_empleados as ge
 import interfaces.ventanas.administrador.gestionar_pagos as gp
 import interfaces.ventanas.administrador.gestionar_prestamos as gpre
@@ -98,23 +94,11 @@ class Login:
 def gestionar_solicitud_parametrico():
     gestionar_solicitud_parametrico_window = gsp.gestionar_solicitud_parametrico()
     gestionar_solicitud_parametrico_window.root.mainloop()
-    
-def gestionar_prestamos_parametrico():
-    gestionar_prestamos_parametrico_window = gprp.gestionar_prestamos_parametrico()
-    gestionar_prestamos_parametrico_window.root.mainloop()
-    
+      
 def gestionar_pagos_parametrico():
-    gestionar_pagos_parametrico_window = gpp.gestionar_pagos_parametrico()
+    gestionar_pagos_parametrico_window = gpp.gestionar_pagos_parametricos()
     gestionar_pagos_parametrico_window.root.mainloop()
     
-def ver_reportes_parametrico():
-    ver_reportes_parametrico_window = vrp.ver_reportes_parametrico()
-    ver_reportes_parametrico_window.root.mainloop()
-    
-def consulta_multitabla_parametrico():
-    consulta_multitabla_parametrico_window = cmp.consulta_multitabla_parametrico()
-    consulta_multitabla_parametrico_window.root.mainloop()
-
 # FUNCIONES BOTONES USUARIO ADMINISTRADOR
 def gestionar_usuarios():
     gestionar_usuarios_window = gu.gestionar_usuarios()
@@ -183,7 +167,8 @@ funciones_botones_administrador = [gestionar_usuarios,gestionar_sucursales, gest
                                    gestionar_solicitudes, gestionar_prestamos, gestionar_pagos,
                                    visualizar_ingresos, ver_reportes, historial_solicitudes]
 
-funciones_botones_parametrico = [gestionar_solicitud_parametrico,gestionar_pagos_parametrico]
+funciones_botones_parametrico = [gestionar_solicitud_parametrico,
+                                 gestionar_pagos_parametrico]
 
 funciones_botones_empleado = [gestionar_solicitud_empleado, gestionar_pagos_empleado]
 
