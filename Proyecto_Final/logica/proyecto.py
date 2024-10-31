@@ -27,7 +27,7 @@ def conexion_oracle():
     try:
         connection = oracledb.connect(
             user="SYSTEM", 
-            password="0000", 
+            password="Arango2004", 
             dsn="localhost:1521/xe"
         )
         return connection
@@ -206,3 +206,7 @@ def retornar_tipo_usuario():
 def eliminar_empleado(elementos):
     identificacion = elementos[0]
     empleados.eliminar_empleado(identificacion) 
+
+def eliminar_usuario(elementos):
+    identificacion = elementos[0]
+    usuarios.delete_usuario(identificacion)

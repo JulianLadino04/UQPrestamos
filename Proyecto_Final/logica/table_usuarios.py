@@ -8,7 +8,7 @@ def get_connection():
     try:
         connection = oracledb.connect(
             user="SYSTEM", 
-            password="0000", 
+            password="Arango2004", 
             dsn="localhost:1521/xe"
         )
         return connection
@@ -139,6 +139,43 @@ def obtener_tipo_user_ID(id_user: str) -> str:
         cursor.close()
         connection.close()
         
+def obtener_usuario_identificacion_y_user(identificacion: str, user: str):
+    connection = get_connection()
+    cursor = connection.cursor()
+    try:
+        # Consulta para buscar el usuario por su IDENTIFICACIÓN y USERNAME
+        sql = """
+        SELECT USERNAME, PASSWORD, USUARIO
+        FROM CREDENCIALES 
+        WHERE IDENTIFICACION = :1 AND USERNAME = :2
+        """
+        cursor.execute(sql, (identificacion, user))  # Asegúrate de que esto sea una tupla
+
+        # Obtener la fila completa de resultados
+        fila = cursor.fetchone()
+
+        if fila is None:
+            print(f"No se encontró ningún usuario con la IDENTIFICACIÓN {identificacion} y el USERNAME {user}.")
+            return None
+
+        # Desempaquetar los resultados
+        usuario, password, id_usuario = fila
+
+        # Verificar las credenciales
+        if usuario == user:
+            print(f"Se encontró el usuario con la IDENTIFICACIÓN {identificacion} y el USERNAME {user}.")
+            return id_usuario
+        else:
+            print(f"Credenciales incorrectas.")
+            return None
+
+    except Exception as e:
+        print(f"Ocurrió un error al buscar el usuario: {str(e)}")
+
+    finally:
+        cursor.close()
+        connection.close()
+
         
 def obtener_usuario_user(user: str, contrasena: str):
     connection = get_connection()
