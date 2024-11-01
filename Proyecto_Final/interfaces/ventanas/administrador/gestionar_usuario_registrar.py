@@ -1,9 +1,8 @@
 import customtkinter as ctk
 import logica.proyecto as proyecto
 import interfaces.GUI as ventana_principal
-import tkinter as tk
 import interfaces.ventanas.administrador.gestionar_usuarios as gu
-
+import tkinter as tk
 
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
@@ -19,9 +18,10 @@ class RegistrarUsuarios:
         self.root = ctk.CTk()
         self.root.title("Registrar Usuario")
         self.root.geometry("1000x500")
+        
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        x = (screen_width // 2) - (700 // 2) - 70
+        x = (screen_width // 2) - (1000 // 2) - 70
         y = (screen_height // 2) - (500 // 2)
         self.root.geometry(f"1000x500+{x}+{y}")
         self.root.resizable(False, False)
@@ -97,11 +97,6 @@ class RegistrarUsuarios:
             self.info_create.configure(text="Se registró correctamente", fg_color="green")
             print(f"Registrando usuario con Identificación: {identificacion}, Nombre: {nombre}, Usuario: {usuario}")
 
-    def ir_a_opciones(self):
-        self.root.destroy()
-        tipo_usuario = proyecto.retornar_tipo_usuario()
-        ventana_principal.Opciones(tipo_usuario)
-
     def volver_principal(self):
         self.root.destroy()
         gestionar_usuarios()
@@ -114,4 +109,3 @@ def gestionar_usuarios():
 if __name__ == "__main__":
     app = RegistrarUsuarios()
     app.root.mainloop()
-

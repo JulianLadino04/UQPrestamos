@@ -97,3 +97,17 @@ def buscar_estado_por_nombre(nombre_estado):
     finally:
         cursor.close()
         connection.close()
+
+def obtener_estados():
+    connection = get_connection()
+    cursor = connection.cursor()
+    try:
+        sql = "SELECT * FROM ESTADO"
+        cursor.execute(sql)
+        records = cursor.fetchall()
+        return records
+    except Exception as e:
+        print(f"Error al mostrar estados: {e}")
+    finally:
+        cursor.close()
+        connection.close()

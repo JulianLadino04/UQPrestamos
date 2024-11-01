@@ -193,7 +193,7 @@ def obtener_usuario_user(user: str, contrasena: str):
         fila = cursor.fetchone()
 
         if fila is None:
-            print(f"No se encontró ningún usuario con el USERNAME {user}.")
+            print(f"No se encontro ningún usuario con el USERNAME {user}.")
             return None
 
         # Desempaquetar los resultados
@@ -213,6 +213,7 @@ def obtener_usuario_user(user: str, contrasena: str):
     finally:
         cursor.close()
         connection.close()
+
     
 # Función para actualizar un usuario en la base de datos
 def update_usuario(user_id, username, password, nivel, nombre):

@@ -78,7 +78,7 @@ class gestionar_estado_empleado:
     def ir_a_opciones(self):
         """Cerrar la ventana actual y abrir la ventana de opciones."""
         self.root.destroy()  # Cierra la ventana de gestión de empleados
-        tipo_usuario = proyecto.retornar_tipo_usuario() + ""
+        tipo_usuario = proyecto.retornar_tipo_usuario()
         ventana_principal.Opciones(tipo_usuario)  # Llama a la ventana de opciones
         
     # Método de ejemplo para volver al menú principal

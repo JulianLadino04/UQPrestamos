@@ -1,5 +1,6 @@
 import oracledb
 import datetime
+import logica.proyecto as proyecto
 
 # Función para conectarse a la base de datos
 def get_connection():
@@ -23,7 +24,13 @@ def validar_monto(empleado_id, monto):
     try:
         sql = "SELECT CARGO FROM EMPLEADO WHERE ID_EMPLEADO = :1"
         cursor.execute(sql, (empleado_id,))
-        tipo_empleado = cursor.fetchone()[0]
+        resultado = cursor.fetchone()
+        
+        if resultado is None:
+            print(f"No se encontró el empleado con ID: {empleado_id}.")
+            return False
+        
+        tipo_empleado = resultado[0]
         
         limites_monto = {
             'Operario': 10000000,
@@ -32,10 +39,16 @@ def validar_monto(empleado_id, monto):
             'Otros': 12000000
         }
         
-        if monto > limites_monto.get(tipo_empleado, 0):
-            raise ValueError(f"El monto solicitado excede el límite permitido para el tipo de empleado {tipo_empleado}.")
-        else:
-            return True
+        # Validar que el monto es un número
+        if not isinstance(monto, (int, float)):
+            print("El monto debe ser un número.")
+            return False
+
+        if int(monto) > limites_monto.get(tipo_empleado, 0):  # 0 si no hay límite definido
+            print(f"El monto solicitado excede el límite permitido para el tipo de empleado {tipo_empleado}.")
+            return False
+        
+        return True
     except Exception as e:
         print(f"Error al validar el monto: {e}")
         return False
@@ -43,45 +56,55 @@ def validar_monto(empleado_id, monto):
         cursor.close()
         connection.close()
 
+
 # Registrar solicitud
 def registrar_solicitud(fecha_solicitud, empleado_id, monto, periodo):
-    if not validar_monto(empleado_id, monto):
-        print(f"No se pudo registrar la solicitud debido a un monto excedido para el empleado {empleado_id}.")
-        return None
-
+    # Establecer el estado inicial de la solicitud
+    estado_solicitud = 'PENDIENTE'
+    
+    # Conectar a la base de datos y crear un cursor
     connection = get_connection()
     cursor = connection.cursor()
-    
+
     try:
-        # Asignar tasa de interés según el período
-        tasas_interes = {
-            24: 7.0,
-            36: 7.5,
-            48: 8.0,
-            60: 8.3,
-            72: 8.6
-        }
-        tasa_interes = tasas_interes.get(periodo, None)
-        if tasa_interes is None:
-            raise ValueError(f"Periodo no válido: {periodo}")
+        # Validar el monto y actualizar el estado si es necesario
+        if not validar_monto(empleado_id, monto):
+            estado_solicitud = 'REPROBADA'
+            print(f"La solicitud fue reprobada. El monto solicitado excede el límite permitido para el cargo.")
+        
+        # Convertir periodo a entero
+        periodo = int(periodo)
+
+        # Obtener la tasa de interés
+        tasa_interes = proyecto.obtener_tasa_interes(periodo)
+        print(f"Tasa de interés asignada: {tasa_interes}%")
 
         # SQL para insertar la solicitud
         sql = '''INSERT INTO SOLICITUD (FECHA_SOLICITUD, ID_EMPLEADO, MONTO_SOLICITADO, PERIODO_MESES, ESTADO, TASA_INTERES) 
-                 VALUES (:1, :2, :3, :4, :5, :6) RETURNING ID_SOLICITUD INTO :7'''
+                VALUES (:1, :2, :3, :4, :5, :6) RETURNING ID_SOLICITUD INTO :7'''
         
         # Obtener el ID de la solicitud generada
         id_solicitud = cursor.var(oracledb.NUMBER)
         
-        cursor.execute(sql, (fecha_solicitud, empleado_id, monto, periodo, 'pendiente', tasa_interes, id_solicitud))
+        # Ejecutar la inserción
+        cursor.execute(sql, (fecha_solicitud, empleado_id, monto, periodo, estado_solicitud, tasa_interes, id_solicitud))
         connection.commit()
         
         print(f"Solicitud registrada correctamente con ID: {id_solicitud.getvalue()}")
         return id_solicitud.getvalue()
+
+    except ValueError as e:
+        print(f"Error de valor: {e}")
+
     except Exception as e:
         print(f"Error al registrar la solicitud: {e}")
+
     finally:
-        cursor.close()
-        connection.close()
+        # Asegúrate de que cursor y connection existan antes de cerrarlos
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
 
 # Leer una solicitud
 def leer_solicitud(id_solicitud):
@@ -110,7 +133,7 @@ def actualizar_solicitud(id_solicitud, nuevo_estado):
     
     try:
         # Validar que el nuevo estado esté dentro de los valores permitidos
-        estados_permitidos = ['pendiente', 'en estudio', 'aprobada', 'reprobada']
+        estados_permitidos = ['PENDIENTE', 'EN ESTUDIO', 'APROBADA', 'RECHAZADA']
         if nuevo_estado not in estados_permitidos:
             raise ValueError(f"Estado '{nuevo_estado}' no permitido. Solo se permiten: {estados_permitidos}")
         
@@ -194,3 +217,61 @@ def mostrar_solicitudes():
     finally:
         cursor.close()
         connection.close()
+
+def update_solicitud(id_empleado, solicitud_id, monto, periodo):
+    estado_solicitud = 'PENDIENTE'
+    connection = None
+    cursor = None
+    
+    try:
+        # Establecer la conexión y el cursor
+        connection = get_connection()
+        cursor = connection.cursor()
+        
+        # Validar el monto y actualizar el estado si es necesario
+        if not validar_monto(id_empleado, monto):
+            estado_solicitud = 'REPROBADA'
+            print("La solicitud fue reprobada. El monto solicitado excede el límite permitido para el cargo.")
+        
+        # Convertir periodo a entero
+        periodo = int(periodo)
+
+        # Obtener la tasa de interés
+        tasa_interes = proyecto.obtener_tasa_interes(periodo)
+        print(f"Tasa de interés asignada: {tasa_interes}%")
+        
+        # Actualizar los datos en la tabla SOLICITUD
+        sql = """
+            UPDATE SOLICITUD
+            SET MONTO_SOLICITADO = :1,
+                PERIODO_MESES = :2,
+                ESTADO = :3
+            WHERE ID_SOLICITUD = :4
+        """
+        cursor.execute(sql, (monto, periodo, estado_solicitud, solicitud_id))
+        
+        # Confirmar los cambios en la base de datos
+        connection.commit()
+        print("Solicitud actualizada correctamente.")
+        
+    except ValueError as e:
+        print(f"Error de valor: {e}")
+    except Exception as e:
+        print(f"Error al actualizar la solicitud: {e}")
+    finally:
+        # Cerrar cursor y conexión si fueron abiertos
+        if cursor is not None:
+            cursor.close()
+        if connection is not None:
+            connection.close()
+
+
+def update_estado_solicitud(solicitud_id, estado):
+    connection = get_connection()
+    cursor = connection.cursor()
+    sql = "UPDATE SOLICITUD SET ESTADO = :1 WHERE ID_SOLICITUD = :2"
+    cursor.execute(sql, (estado ,solicitud_id))
+    connection.commit()
+    cursor.close()
+    connection.close()
+

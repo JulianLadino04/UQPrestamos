@@ -9,13 +9,8 @@ import tkinter as tk
 import interfaces.ventanas.empleado.gestionar_solicitud_empleado as gse
 import interfaces.ventanas.empleado.gestionar_pagos_empleado as gpe
 import interfaces.ventanas.empleado.gestionar_estado_empleado as gee
-
-import interfaces.ventanas.parametrico.consulta_multitabla_parametrico as cmp
 import interfaces.ventanas.parametrico.gestionar_pagos_parametrico as gpp
-import interfaces.ventanas.parametrico.gestionar_prestamos_parametrico as gprp
 import interfaces.ventanas.parametrico.gestionar_solicitud_parametrico as gsp
-import interfaces.ventanas.parametrico.ver_reportes_parametrico as vrp
-
 import interfaces.ventanas.administrador.gestionar_empleados as ge
 import interfaces.ventanas.administrador.gestionar_pagos as gp
 import interfaces.ventanas.administrador.gestionar_prestamos as gpre
@@ -25,6 +20,7 @@ import interfaces.ventanas.administrador.gestionar_usuarios as gu
 import interfaces.ventanas.administrador.multitabla as mul
 import interfaces.ventanas.administrador.ver_reportes as vr
 import interfaces.ventanas.administrador.visualizar_ingresos as vi
+import interfaces.ventanas.administrador.historial_solicitudes as hi
 
 carpeta_principal = os.path.dirname(__file__)
 carpeta_imagenes = os.path.join(carpeta_principal, "imagenes")
@@ -98,23 +94,11 @@ class Login:
 def gestionar_solicitud_parametrico():
     gestionar_solicitud_parametrico_window = gsp.gestionar_solicitud_parametrico()
     gestionar_solicitud_parametrico_window.root.mainloop()
-    
-def gestionar_prestamos_parametrico():
-    gestionar_prestamos_parametrico_window = gprp.gestionar_prestamos_parametrico()
-    gestionar_prestamos_parametrico_window.root.mainloop()
-    
+      
 def gestionar_pagos_parametrico():
-    gestionar_pagos_parametrico_window = gpp.gestionar_pagos_parametrico()
+    gestionar_pagos_parametrico_window = gpp.gestionar_pagos_parametricos()
     gestionar_pagos_parametrico_window.root.mainloop()
     
-def ver_reportes_parametrico():
-    ver_reportes_parametrico_window = vrp.ver_reportes_parametrico()
-    ver_reportes_parametrico_window.root.mainloop()
-    
-def consulta_multitabla_parametrico():
-    consulta_multitabla_parametrico_window = cmp.consulta_multitabla_parametrico()
-    consulta_multitabla_parametrico_window.root.mainloop()
-
 # FUNCIONES BOTONES USUARIO ADMINISTRADOR
 def gestionar_usuarios():
     gestionar_usuarios_window = gu.gestionar_usuarios()
@@ -152,9 +136,13 @@ def multitabla():
     multitabla_window = mul.multitabla()
     multitabla_window.root.mainloop()
 
+def historial_solicitudes():
+    historial_solicitudes = hi.HistorialPrestamos()
+    historial_solicitudes.root.mainloop()
+
 # FUNCIONES BOTONES USUARIO EMPLEADO
 def gestionar_solicitud_empleado():
-    gestionar_solicitud_empleado_window = gse.gestionar_solicitud_empleado()
+    gestionar_solicitud_empleado_window = gse.GestionarSolicitudEmpleado()
     gestionar_solicitud_empleado_window.root.mainloop()
 
 def gestionar_pagos_empleado():
@@ -168,22 +156,21 @@ def gestionar_estado_empleado():
 # Botones según tipo de usuario
 botones_administrador = ['Gestionar Usuarios', 'Gestionar Sucursales', 'Gestionar Empleados', 'Gestionar Solicitudes',
                          'Gestionar Prestamos', 'Gestionar Pagos', 'Visualizar Ingresos',
-                         'Ver Reportes', 'Consulta Multitabla']
+                         'Ver Reportes', 'Historial Prestamos']
 
-botones_parametrico = ['Gestionar Solicitudes', 'Gestionar Prestamos', 'Gestionar Pagos',
-                       'Ver Reportes', 'Consulta Multitabla']
+botones_parametrico = ['Gestionar Solicitudes', 'Gestionar Pagos']
 
-botones_empleado = ['Gestionar Solicitudes', 'Gestionar Pagos', 'Estado Cuenta']
+botones_empleado = ['Gestionar Solicitudes', 'Gestionar Pagos']
 
 # Funciones asociadas a los botones
 funciones_botones_administrador = [gestionar_usuarios,gestionar_sucursales, gestionar_empleados,
                                    gestionar_solicitudes, gestionar_prestamos, gestionar_pagos,
-                                   visualizar_ingresos, ver_reportes, multitabla]
+                                   visualizar_ingresos, ver_reportes, historial_solicitudes]
 
-funciones_botones_parametrico = [gestionar_solicitud_parametrico, gestionar_prestamos_parametrico,
-                                 gestionar_pagos_parametrico, ver_reportes_parametrico, consulta_multitabla_parametrico]
+funciones_botones_parametrico = [gestionar_solicitud_parametrico,
+                                 gestionar_pagos_parametrico]
 
-funciones_botones_empleado = [gestionar_solicitud_empleado, gestionar_pagos_empleado, gestionar_estado_empleado]
+funciones_botones_empleado = [gestionar_solicitud_empleado, gestionar_pagos_empleado]
 
 # Ventana de opciones según el tipo de usuario
 class Opciones:
@@ -200,7 +187,7 @@ class Opciones:
         self.root.grid_columnconfigure(1, weight=1)
         self.root.grid_columnconfigure(2, weight=1)
 
-        titulo = ctk.CTkLabel(master=self.root, text="Funciones de usuario ", height=32, font=("Roboto", 30))
+        titulo = ctk.CTkLabel(master=self.root, text="Funciones de " + tipo, height=32, font=("Roboto", 30))
         titulo.grid(row=0, column=0, columnspan=3, pady=15, sticky="nsew")
 
         logo = ctk.CTkImage(
@@ -212,6 +199,9 @@ class Opciones:
         etiqueta.grid(row=1, column=0, columnspan=3, pady=15, sticky="nsew")
 
         self._crear_botones(tipo)
+
+        # Asegurar que el botón "Salir" esté al final con espacio adicional
+        self.root.grid_rowconfigure(10, weight=1)
 
         self.root.mainloop()
 
@@ -228,7 +218,7 @@ class Opciones:
             "Principal": funciones_botones_administrador
         }.get(tipo, [])
 
-        # Crear botones de funciones
+        # Crear botones de funciones, ajustando en una cuadrícula de 3 columnas
         for contador, (texto_boton, funcion) in enumerate(zip(botones, funciones)):
             button = ctk.CTkButton(
                 master=self.root,
@@ -237,10 +227,12 @@ class Opciones:
                 width=200,
                 command=lambda f=funcion: [self.root.destroy(), f()]  # Cierra la ventana actual y luego ejecuta la función
             )
-            button.grid(row=2 + contador // 3, column=contador % 3, padx=10, pady=10, sticky="nsew")
-            self.root.grid_columnconfigure(contador % 3, weight=1)
+            row = 2 + (contador // 3)  # Organiza en filas de 3 botones
+            column = contador % 3       # Asegura que haya 3 columnas
+            button.grid(row=row, column=column, padx=10, pady=10, sticky="nsew")
+            self.root.grid_columnconfigure(column, weight=1)
 
-        # Crear el botón "Salir" para volver al login
+        # Crear el botón "Salir" para volver al login, poniéndolo en la última fila
         salir_button = ctk.CTkButton(
             master=self.root,
             text="Salir",
@@ -248,8 +240,9 @@ class Opciones:
             width=200,
             command=self.volver_al_login  # Llama a la función que regresa al login
         )
-        # Ubicar el botón "Salir" en una nueva fila
-        salir_button.grid(row=2 + len(botones) // 3, column=1, padx=10, pady=20, sticky="nsew")
+        # Ubicar el botón "Salir" en una fila separada, centrado
+        salir_row = 10  # Ponerlo en la fila 10 para evitar que se sobreponga
+        salir_button.grid(row=salir_row, column=1, padx=10, pady=20, sticky="nsew")  # Columna central (1)
 
     def volver_al_login(self):
         proyecto.hora_salida_usuario()

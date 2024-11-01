@@ -5,6 +5,8 @@ import interfaces.ventanas.administrador.gestionar_usuarios as gu
 import tkinter as tk
 
 datos_usuario = []
+niveles_sistema = proyecto.enviar_niveles()
+niveles_en_cadenas = [nivel[0] for nivel in niveles_sistema]
 
 def recibir_usuario(datos):
     global datos_usuario
@@ -14,7 +16,7 @@ class EditarUsuario:
     def __init__(self):
         self.root = ctk.CTk()
         self.root.title("Editar Usuario")
-        self.root.geometry("700x500")
+        self.root.geometry("1000x500")
         self.root.configure(background="#2b2b2b")
 
         # Cálculo para centrar la ventana y desplazarla hacia la derecha
@@ -22,7 +24,7 @@ class EditarUsuario:
         screen_height = self.root.winfo_screenheight()
         x = (screen_width // 2) - (700 // 2) + 120
         y = (screen_height // 2) - (500 // 2)
-        self.root.geometry(f"700x500+{x}+{y}")
+        self.root.geometry(f"1000x500+{x}+{y}")
         self.root.resizable(False, False)
 
         bg_color = "#2b2b2b"
@@ -35,6 +37,10 @@ class EditarUsuario:
 
         form_frame = ctk.CTkFrame(main_frame, fg_color=bg_color)
         form_frame.pack(pady=10, padx=20, fill="both", expand=True)
+
+        # Configurar las columnas de forma proporcional
+        form_frame.grid_columnconfigure(0, weight=1)
+        form_frame.grid_columnconfigure(1, weight=2)
 
         # Etiquetas y campos del formulario
         ctk.CTkLabel(form_frame, text="ID Usuario", font=("Roboto", 18)).grid(row=0, column=0, padx=10, pady=5, sticky="e")
@@ -53,9 +59,9 @@ class EditarUsuario:
         self.password.grid(row=2, column=1, padx=10, pady=5)
         self.password.insert(0, datos_usuario[2])
 
-        ctk.CTkLabel(form_frame, text="Nivel", font=("Roboto", 18)).grid(row=3, column=0, padx=10, pady=5, sticky="e")
+        ctk.CTkLabel(form_frame, text="Nivel en Sistema", font=("Roboto", 18)).grid(row=3, column=0, padx=10, pady=6, sticky="e")
         self.nivel = tk.StringVar()
-        ctk.CTkOptionMenu(form_frame, variable=self.nivel, values=["Admin", "User"], width=200).grid(row=3, column=1, padx=10, pady=5)
+        ctk.CTkOptionMenu(form_frame, variable=self.nivel, values=niveles_en_cadenas).grid(row=3, column=1, padx=10, pady=5)
         self.nivel.set(datos_usuario[3])
 
         ctk.CTkLabel(form_frame, text="Nombre", font=("Roboto", 18)).grid(row=4, column=0, padx=10, pady=5, sticky="e")
@@ -92,3 +98,9 @@ class EditarUsuario:
         else:
             proyecto.editar_usuario(id_usuario, username, password, nivel, nombre)
             self.info_update.configure(text="Usuario editado correctamente", fg_color="green")
+
+
+# Función para gestionar empleados o mostrar el menú principal
+def gestionar_usuarios():
+    gestionar_usuarios_window = gu.gestionar_usuarios()
+    gestionar_usuarios_window.root.mainloop()

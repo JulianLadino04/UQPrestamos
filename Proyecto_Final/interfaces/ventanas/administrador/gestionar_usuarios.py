@@ -115,12 +115,17 @@ class gestionar_usuarios:
         else:
             print("No se ha seleccionado ningún usuario")
 
-
-    def ir_a_opciones(self):
-        """Cerrar la ventana actual y abrir la ventana de opciones."""
-        self.root.destroy()
-        tipo_usuario = proyecto.retornar_tipo_usuario() + ""
-        ventana_principal.Opciones(tipo_usuario)
+    def enviar_usuario(self):
+        selected_item = self.tree.selection()
+        if selected_item:
+            fila = self.tree.item(selected_item)['values']
+            print(f"Fila seleccionada: {fila}")
+            edtUs.recibir_usuario(fila)
+            self.root.destroy() 
+            ingresar_ventana_edicion_usuario = edtUs.EditarUsuario()
+            ingresar_ventana_edicion_usuario.root.mainloop()
+        else:
+            print("No se ha seleccionado ninguna fila")    
 
     def eliminar_usuario(self):
         selected_item = self.tree.selection()
@@ -131,7 +136,13 @@ class gestionar_usuarios:
             proyecto.eliminar_usuario(fila)
             gestionar_usuarios()
         else:
-            print("No se ha seleccionado ninguna fila")  
+            print("No se ha seleccionado ninguna fila")   
+
+    def ir_a_opciones(self):
+        """Cerrar la ventana actual y abrir la ventana de opciones."""
+        self.root.destroy()
+        tipo_usuario = proyecto.retornar_tipo_usuario() + ""
+        ventana_principal.Opciones(tipo_usuario)
 
     # Método de ejemplo para volver al menú principal
     def volver_principal(self):
