@@ -1,58 +1,71 @@
 import customtkinter as ctk
-import tkinter as tk
 import logica.proyecto as proyecto
-from datetime import datetime
 import interfaces.ventanas.administrador.gestionar_solicitudes as ge
+import tkinter as tk
+from datetime import datetime
 
-# Valores predefinidos para el periodo y el estado
+ctk.set_appearance_mode("System")
+ctk.set_default_color_theme("blue")
+
+# Valores predefinidos para el periodo
 periodos_disponibles = ["24", "36", "48", "60", "72"]
-estados_disponibles = ["Pendiente", "Aprobado", "Rechazado"]
 
 class CrearSolicitudAdministrador:
     def __init__(self):
-        # Crear la ventana principal
+        # Configuración de la ventana principal
         self.root = ctk.CTk()
         self.root.title("Crear Nueva Solicitud de Empleado")
-        self.root.geometry("500x500")  # Ajustamos el tamaño de la ventana
+        self.root.geometry("700x500")
+        
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        x = (screen_width // 2) - (1000 // 2) + 120
+        y = (screen_height // 2) - (500 // 2)
+        self.root.geometry(f"700x500+{x}+{y}")
         self.root.resizable(False, False)
+        self.root.configure(background="#2b2b2b")
 
-        # Crear el frame del formulario
-        form_frame = ctk.CTkFrame(self.root)
-        form_frame.pack(pady=10, padx=20, fill="both", expand=True)
+        # Color de fondo principal
+        bg_color = "#2b2b2b"
 
-        # Campo para el ID del Empleado
-        ctk.CTkLabel(form_frame, text="ID Empleado", font=("Roboto", 18)).grid(row=2, column=0, padx=10, pady=10, sticky="e")
-        self.id_empleado = ctk.CTkEntry(form_frame, width=140)
-        self.id_empleado.grid(row=2, column=1, padx=10, pady=10, sticky="w")
+        # Frame principal centrado
+        main_frame = ctk.CTkFrame(self.root, width=500, height=500, fg_color=bg_color)
+        main_frame.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Campo para el Monto
-        ctk.CTkLabel(form_frame, text="Monto", font=("Roboto", 18)).grid(row=3, column=0, padx=10, pady=10, sticky="e")
-        self.monto = ctk.CTkEntry(form_frame, width=140)
-        self.monto.grid(row=3, column=1, padx=10, pady=10, sticky="w")
+        # Título
+        title_label = ctk.CTkLabel(main_frame, text="Crear Nueva Solicitud", font=("Roboto", 24, "bold"))
+        title_label.pack(pady=(10, 5))
 
-        # Campo para el Periodo (usando OptionMenu)
-        ctk.CTkLabel(form_frame, text="Periodo", font=("Roboto", 18)).grid(row=4, column=0, padx=10, pady=10, sticky="e")
+        # Información sobre el registro
+        self.info_create = ctk.CTkLabel(main_frame, text="", font=("Roboto", 18))
+        self.info_create.pack(pady=(5, 10))
+
+        # Frame para los campos de entrada y etiquetas
+        fields_frame = ctk.CTkFrame(main_frame)
+        fields_frame.pack(pady=10)
+
+        # Campos del formulario
+        ctk.CTkLabel(fields_frame, text="ID Empleado", font=("Roboto", 18)).grid(row=0, column=0, sticky="e", padx=(0, 10))
+        self.id_empleado = ctk.CTkEntry(fields_frame, width=200)
+        self.id_empleado.grid(row=0, column=1, pady=5)
+
+        ctk.CTkLabel(fields_frame, text="Monto", font=("Roboto", 18)).grid(row=1, column=0, sticky="e", padx=(0, 10))
+        self.monto = ctk.CTkEntry(fields_frame, width=200)
+        self.monto.grid(row=1, column=1, pady=5)
+
+        ctk.CTkLabel(fields_frame, text="Periodo", font=("Roboto", 18)).grid(row=2, column=0, sticky="e", padx=(0, 10))
         self.periodo = tk.StringVar()
-        ctk.CTkOptionMenu(form_frame, variable=self.periodo, values=periodos_disponibles).grid(row=4, column=1, padx=10, pady=10, sticky="w")
+        ctk.CTkOptionMenu(fields_frame, variable=self.periodo, values=periodos_disponibles, width=200).grid(row=2, column=1, pady=5)
 
-        # Botón para crear la nueva solicitud
-        ctk.CTkButton(self.root, text="Crear Solicitud", command=self.validar_campos).pack(pady=20)
+        # Botones
+        button_frame = ctk.CTkFrame(main_frame, fg_color=bg_color)
+        button_frame.pack(pady=(20, 10))
 
-        # Botón para salir y volver al menú principal
-        salir_button = ctk.CTkButton(
-            master=self.root,
-            text="Salir",
-            height=40,
-            width=200,
-            command=self.volver_principal  # Asignamos la función aquí
-        )
-        salir_button.pack(pady=10)
+        crear_button = ctk.CTkButton(button_frame, text="Crear Solicitud", command=self.validar_campos, height=40, width=200, font=("Roboto", 18, "bold"))
+        crear_button.grid(row=0, column=0, padx=10)
 
-    # Método para volver al menú principal
-    def volver_principal(self):
-        self.root.destroy()
-        ingresar_ventana_solicitud = ge.gestionar_solicitudes()
-        ingresar_ventana_solicitud.root.mainloop()
+        salir_button = ctk.CTkButton(button_frame, text="Salir", command=self.volver_principal, height=40, width=200, font=("Roboto", 18, "bold"))
+        salir_button.grid(row=0, column=1, padx=10)
 
     def validar_campos(self):
         id_empleado = self.id_empleado.get()
@@ -60,20 +73,18 @@ class CrearSolicitudAdministrador:
         periodo = self.periodo.get()
 
         if "" in [id_empleado, monto, periodo]:
-            if hasattr(self, "info_create"):
-                self.info_create.destroy()
-            self.info_create = ctk.CTkLabel(self.root, text="Faltan datos por llenar", text_color="red")
-            self.info_create.pack()
+            self.info_create.configure(text="Faltan datos por llenar", fg_color="red")
         else:
-            if hasattr(self, "info_create"):
-                self.info_create.destroy()
-            # Asumiendo que proyecto tiene una función para crear una nueva solicitud
             proyecto.crear_solicitud(datetime.now(), id_empleado, monto, periodo)
-            self.info_create = ctk.CTkLabel(self.root, text="Solicitud creada correctamente", text_color="green")
-            self.info_create.pack()
+            self.info_create.configure(text="Solicitud creada correctamente", fg_color="green")
             print(f"Solicitud creada: ID Empleado: {id_empleado}, Monto: {monto}, Periodo: {periodo}")
 
-# Función para gestionar empleados o mostrar el menú principal
-def gestionar_empleados():
-    gestionar_empleados_window = ge.gestionar_solicitudes()
-    gestionar_empleados_window.root.mainloop()
+    def volver_principal(self):
+        self.root.destroy()
+        ingresar_ventana_solicitud = ge.gestionar_solicitudes()
+        ingresar_ventana_solicitud.root.mainloop()
+
+# Para iniciar la ventana
+if __name__ == "__main__":
+    app = CrearSolicitudAdministrador()
+    app.root.mainloop()

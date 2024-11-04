@@ -36,6 +36,21 @@ def registrar_pago(numero_prestamo, numero_pago, fecha_pago, valor):
         cursor.close()
         connection.close()
 
+def eliminar_pago(id_pago):
+    connection = get_connection()
+    cursor = connection.cursor()
+    
+    try:
+        sql = "DELETE FROM PAGO WHERE ID_PAGO = :1"
+        cursor.execute(sql, (id_pago,))
+        connection.commit()
+        print(f"Pago con ID '{id_pago}' eliminado correctamente.")
+    except Exception as e:
+        print(f"Error al eliminar el pago: {e}")
+    finally:
+        cursor.close()
+        connection.close()
+
 def leer_pagos():
     connection = get_connection()
     cursor = connection.cursor()

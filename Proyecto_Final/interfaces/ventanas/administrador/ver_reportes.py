@@ -1,85 +1,150 @@
-import customtkinter as ctk
 import os
-import logica.proyecto as proyecto
-from PIL import Image
-import interfaces.GUI as ventana_principal
-from tkinter import ttk
+import customtkinter as ctk
+import oracledb
+from reportlab.lib.pagesizes import landscape, legal
+from reportlab.pdfgen import canvas
 import tkinter as tk
+
 
 class ver_reportes:
     def __init__(self):
         self.root = ctk.CTk()
         self.root.title("Reportes")
-        self.root.geometry("750x550")
-        self.root.resizable(True, True)
+        self.root.geometry("550x300")
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        x = (screen_width // 2) - (550 // 2) + 200
+        y = (screen_height // 2) - (300 // 2)
+        self.root.geometry(f"550x300+{x}+{y}")
+        self.root.resizable(False, False)
+        self.root.configure(background="#2b2b2b")
 
-        ctk.CTkLabel(master=self.root, text="Vista de Reportes del Sistema", font=("Roboto", 36)).pack(pady=15)
+        ctk.CTkLabel(master=self.root, text="Reportes del Sistema", font=("Roboto", 36)).pack(pady=15)
 
-        # Configurar la conexión a Oracle
-        try:
-            connection = proyecto.conexion_oracle()
-            cursor = connection.cursor()
-            cursor.execute("SELECT * FROM EMPLEADO")
-
-            columnas = [desc[0] for desc in cursor.description]
-            filas = cursor.fetchall()
-            cursor.close()
-            connection.close()
-        except Exception as e:
-            print(f"Error de conexión o consulta: {e}")
-            return
-
-        # Crear la tabla (Treeview) en la ventana
-        self.tree = ttk.Treeview(self.root, columns=columnas, show="headings", height=10)
-
-        # Establecer el estilo de la tabla
-        style = ttk.Style()
-        style.theme_use('clam')  # Cambia a un tema compatible
-        style.configure("Treeview",
-                        background="#2e2e2e",  # Fondo oscuro
-                        foreground="#ffffff",  # Texto blanco
-                        rowheight=25,
-                        fieldbackground="#2e2e2e")  # Fondo de las filas
-
-        # Crear las cabeceras de la tabla y ajustar el ancho de las columnas
-        ancho_columnas = 120
-        for col in columnas:
-            self.tree.heading(col, text=col)
-            self.tree.column(col, anchor=tk.CENTER, width=ancho_columnas, stretch=False)
-
-        # Insertar los datos en la tabla
-        for fila in filas:
-            self.tree.insert('', tk.END, values=fila)
-
-        # Empaquetar la tabla
-        self.tree.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
-
-        # Crear un marco (frame) para organizar los botones en fila
         botones_frame = ctk.CTkFrame(self.root)
         botones_frame.pack(pady=10)
 
-        # Añadir los botones alineados en fila utilizando grid
-        ctk.CTkButton(botones_frame, text="Editar Reporte", command=self.obtener_seleccion).grid(row=0, column=0, padx=10)
-        ctk.CTkButton(botones_frame, text="Eliminar Reporte", command=self.obtener_seleccion).grid(row=0, column=1, padx=10)
-        ctk.CTkButton(botones_frame, text="Crear Reporte", command=self.obtener_seleccion).grid(row=0, column=2, padx=10)
-        ctk.CTkButton(self.root, text="Ir a Opciones", command=self.ir_a_opciones).pack(pady=10)
+        # Separar más los botones y cambiar la fuente
+        ctk.CTkButton(botones_frame, text="Generar Reporte de Morosos", command=self.generar_reporte_morosos, 
+                      font=("Arial", 12, "bold")).grid(row=0, column=0, padx=20, pady=10)
+        ctk.CTkButton(botones_frame, text="Generar Reporte Total Prestado por Sucursal", command=self.generar_reporte_total_prestado_por_sucursal, 
+                      font=("Arial", 12, "bold")).grid(row=1, column=0, padx=20, pady=10)
+
         self.root.mainloop()
 
-    def obtener_seleccion(self):
-        selected_item = self.tree.selection()
-        if selected_item:
-            fila = self.tree.item(selected_item)['values']
-            print(f"Fila seleccionada: {fila}")
-        else:
-            print("No se ha seleccionado ninguna fila")   
+    # Función para conectarse a la base de datos
+    def get_connection(self):
+        try:
+            connection = oracledb.connect(
+                user="SYSTEM",
+                password="Arango2004",
+                dsn="localhost:1521/xe"
+            )
+            return connection
+        except oracledb.DatabaseError as e:
+            print(f"Error al conectar a la base de datos: {e}")
 
-    def ir_a_opciones(self):
-        """Cerrar la ventana actual y abrir la ventana de opciones."""
-        self.root.destroy()  # Cierra la ventana de gestión de empleados
-        tipo_usuario = proyecto.retornar_tipo_usuario() + ""
-        ventana_principal.Opciones(tipo_usuario)  # Llama a la ventana de opciones
-        
-    # Método de ejemplo para volver al menú principal
-    def volver_principal(self):
-        self.root.destroy()  # Cierra la ventana actual
-        ver_reportes()
+    def obtener_morosos(self):
+        connection = self.get_connection()
+        cursor = connection.cursor()
+        try:
+            sql = '''SELECT PR.ID_PRESTAMO, PA.NUMERO_CUOTA, PA.FECHA_PAGO, PA.VALOR_PAGO, 
+                             E.ID_EMPLEADO, E.NOMBRE, PR.MONTO
+                      FROM PAGO PA
+                      JOIN PRESTAMO PR ON PA.ID_PRESTAMO = PR.ID_PRESTAMO
+                      JOIN EMPLEADO E ON PR.EMPLEADO_ID = E.ID_EMPLEADO
+                      WHERE PA.MOROSO = 'Y' '''
+            cursor.execute(sql)
+            morosos = cursor.fetchall()
+            return morosos  # Retornar los datos de morosos para ser utilizados en el reporte
+        except Exception as e:
+            print(f"Error al mostrar los morosos: {e}")
+        finally:
+            cursor.close()
+            connection.close()
+
+    def generar_reporte_morosos(self):
+        morosos = self.obtener_morosos()
+
+        if not morosos:
+            print("No hay empleados morosos.")
+            return
+
+        pdf_file = os.path.join(os.path.expanduser("~"), "Documents", "reporte_morosos.pdf")
+        c = canvas.Canvas(pdf_file, pagesize=landscape(legal))  # Cambiamos a tamaño oficio y orientación horizontal
+        width, height = landscape(legal)
+
+        c.drawString(50, height - 50, "Reporte de Empleados Morosos")
+        c.drawString(50, height - 70, f"{'ID Préstamo':<20} {'Número de Cuota':<20} {'Fecha de Pago':<20} {'Valor':<10} {'ID Empleado':<15} {'Nombre':<20} {'Monto Préstamo':<15}")
+        c.drawString(50, height - 90, "-" * 140)  # Ajustamos el guion para que se vea mejor
+
+        y_position = height - 110
+
+        for moroso in morosos:
+            numero_prestamo, numero_cuota, fecha_pago, valor_pago, id_empleado, nombre, monto_prestamo = moroso
+            fecha_pago = fecha_pago.strftime("%Y-%m-%d") if fecha_pago else "N/A"  # Formateo de fecha
+            c.drawString(50, y_position, f"{numero_prestamo:<20} {numero_cuota:<20} {fecha_pago:<20} {valor_pago:<10} {id_empleado:<15} {nombre:<20} {monto_prestamo:<15}")
+            y_position -= 20
+
+            if y_position < 50:
+                c.showPage()
+                y_position = height - 50
+
+        try:
+            c.save()
+            print("Reporte de Morosos generado en el archivo:", pdf_file)
+        except Exception as e:
+            print(f"Error al generar el PDF: {e}")
+
+    def obtener_total_prestado_por_sucursal(self):
+        connection = self.get_connection()
+        cursor = connection.cursor()
+        try:
+            sql = '''SELECT S.NOMBRE, SUM(PR.MONTO) AS TOTAL_PRESTADO
+                     FROM PRESTAMO PR
+                     JOIN EMPLEADO E ON PR.EMPLEADO_ID = E.ID_EMPLEADO
+                     JOIN SUCURSAL S ON E.ID_SUCURSAL = S.ID_SUCURSAL
+                     GROUP BY S.NOMBRE'''
+            cursor.execute(sql)
+            total_prestado = cursor.fetchall()
+            return total_prestado  # Retornar los datos de total prestado por sucursal
+        except Exception as e:
+            print(f"Error al obtener el total prestado por sucursal: {e}")
+        finally:
+            cursor.close()
+            connection.close()
+
+    def generar_reporte_total_prestado_por_sucursal(self):
+        total_prestado = self.obtener_total_prestado_por_sucursal()
+
+        if not total_prestado:
+            print("No hay datos de préstamos por sucursal.")
+            return
+
+        pdf_file = os.path.join(os.path.expanduser("~"), "Documents", "reporte_total_prestado_por_sucursal.pdf")
+        c = canvas.Canvas(pdf_file, pagesize=landscape(legal))  # Cambiamos a tamaño oficio y orientación horizontal
+        width, height = landscape(legal)
+
+        c.drawString(50, height - 50, "Reporte del Total Prestado por Sucursal")
+        c.drawString(50, height - 70, f"{'Sucursal':<30} {'Total Prestado':<20}")
+        c.drawString(50, height - 90, "-" * 50)  # Línea de separación
+
+        y_position = height - 110
+
+        for sucursal in total_prestado:
+            nombre_sucursal, total = sucursal
+            c.drawString(50, y_position, f"{nombre_sucursal:<30} {total:<20}")
+            y_position -= 20
+
+            if y_position < 50:
+                c.showPage()
+                y_position = height - 50
+
+        try:
+            c.save()
+            print("Reporte del Total Prestado por Sucursal generado en el archivo:", pdf_file)
+        except Exception as e:
+            print(f"Error al generar el PDF: {e}")
+
+if __name__ == "__main__":
+    ver_reportes()

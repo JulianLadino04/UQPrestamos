@@ -30,13 +30,18 @@ ctk.set_default_color_theme("blue")
 
 class Login:
     def __init__(self):
-        print(carpeta_principal)
-        print(carpeta_imagenes)
         self.root = ctk.CTk()
         self.root.title("Proyecto Final Bases de Datos")
-        print(self.root.iconbitmap(os.path.join(carpeta_imagenes, "registrar.ico")))
-        self.root.geometry("750x450")
+
+        # Tamaño y posicionamiento de la ventana
+        self.root.geometry("750x500")
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        x = (screen_width // 2) - (750 // 2) + 150
+        y = (screen_height // 2) - (500 // 2)
+        self.root.geometry(f"750x500+{x}+{y}")
         self.root.resizable(False, False)
+        self.root.configure(background="#2b2b2b")
 
         logo = ctk.CTkImage(
             light_image=Image.open(os.path.join(carpeta_imagenes, "registrar.png")),
@@ -44,21 +49,27 @@ class Login:
             size=(200, 200)
         )
 
-        etiqueta = ctk.CTkLabel(master=self.root, image=logo, text="")
+        # Crear un marco principal para centrar los elementos
+        main_frame = ctk.CTkFrame(self.root, fg_color=self.root.cget("bg"))
+        main_frame.pack(expand=True)  # Permitir que el marco se expanda para centrar
+
+        etiqueta = ctk.CTkLabel(master=main_frame, image=logo, text="")
         etiqueta.pack(pady=15)
 
-        ctk.CTkLabel(self.root, text="Usuario").pack()
-        self.usuario = ctk.CTkEntry(self.root)
+        # Etiquetas y entradas con fuente más grande en Arial y negrita
+        ctk.CTkLabel(main_frame, text="Usuario", font=("Arial", 14, "bold")).pack()
+        self.usuario = ctk.CTkEntry(main_frame, font=("Arial", 14), width=150)
         self.usuario.bind("<Button-1>", lambda e: self.usuario.delete(0, "end"))
-        self.usuario.pack()
+        self.usuario.pack(pady=(0, 5))
 
-        ctk.CTkLabel(self.root, text="Contraseña").pack()
-        self.contrasena = ctk.CTkEntry(self.root, show="*")
+        ctk.CTkLabel(main_frame, text="Contraseña", font=("Arial", 14, "bold")).pack()
+        self.contrasena = ctk.CTkEntry(main_frame, show="*", font=("Arial", 14), width=150)
         self.contrasena.insert(0, "*********")
         self.contrasena.bind("<Button-1>", lambda e: self.contrasena.delete(0, "end"))
-        self.contrasena.pack()
+        self.contrasena.pack(pady=(0, 15))
 
-        ctk.CTkButton(self.root, text="Entrar", command=self.validar_login).pack(pady=10)
+        # Botón con fuente más grande en Arial y negrita
+        ctk.CTkButton(main_frame, text="Entrar", command=self.validar_login, font=("Arial", 14, "bold"), width=150).pack(pady=10)
 
         self.root.mainloop()
 
@@ -67,28 +78,24 @@ class Login:
         contrasena = self.contrasena.get()
 
         id_usuario_sesion = proyecto.verificar_credenciales(usuario, contrasena)
-        
-        if id_usuario_sesion is None:  # Asegúrate de usar 'id_usuario_sesion'
+
+        if id_usuario_sesion is None:
             if hasattr(self, "info_login"):
                 self.info_login.destroy()
-            self.info_login = ctk.CTkLabel(self.root, text="Credenciales incorrectas")
+            self.info_login = ctk.CTkLabel(self.root, text="Credenciales incorrectas", text_color="red", font=("Arial", 12))
             self.info_login.pack()
         else:
-                        
             if hasattr(self, "info_login"):
                 self.info_login.destroy()
-            self.info_login = ctk.CTkLabel(self.root, text="Usuario encontrado")
+            self.info_login = ctk.CTkLabel(self.root, text="Usuario encontrado", text_color="green", font=("Arial", 12))
+            self.info_login.pack()
 
             proyecto.almacenar_usuario_sistema(id_usuario_sesion)
             proyecto.hora_ingreso_usuario()
 
-            self.info_login.pack()
-            # Cerrar la ventana de login
             self.root.destroy()
             tipo_usuario = proyecto.obtener_tipo_usuario(usuario)
-            # Iniciar la ventana de opciones
             Opciones(tipo_usuario)
-
 
 #FUNCIONES BOTONES USUARIO PARAMETRICOS
 def gestionar_solicitud_parametrico():
@@ -172,36 +179,57 @@ funciones_botones_parametrico = [gestionar_solicitud_parametrico,
 
 funciones_botones_empleado = [gestionar_solicitud_empleado, gestionar_pagos_empleado]
 
+import customtkinter as ctk
+from PIL import Image
+import os
+
+import customtkinter as ctk
+from PIL import Image
+import os
+
 # Ventana de opciones según el tipo de usuario
 class Opciones:
     def __init__(self, tipo: str):
         self.root = ctk.CTk()
         self.root.title("Opciones")
+        self.root.geometry("1000x600")  # Aumenta el tamaño de la ventana
+        self.root.resizable(False, False)
+        self.root.configure(background="#2b2b2b")
         self.root.iconbitmap(os.path.join(carpeta_imagenes, "logo.ico"))
-        self.root.geometry("750x550")
 
-        self.root.grid_rowconfigure(0, weight=1)
-        self.root.grid_rowconfigure(1, weight=1)
-        self.root.grid_rowconfigure(2, weight=1)
+        # Centrar la ventana
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        x = (screen_width // 2) - (1000 // 2) + 100
+        y = (screen_height // 2) - (600 // 2)  # Aumenta el margen superior
+        self.root.geometry(f"1000x600+{x}+{y}")
+
+        # Configuración de la cuadrícula
+        self.root.grid_rowconfigure(0, weight=1)  # Fila para el título
+        self.root.grid_rowconfigure(1, weight=2)  # Fila para el logo
+        self.root.grid_rowconfigure(2, weight=1)  # Fila para los botones
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_columnconfigure(1, weight=1)
         self.root.grid_columnconfigure(2, weight=1)
 
-        titulo = ctk.CTkLabel(master=self.root, text="Funciones de " + tipo, height=32, font=("Roboto", 30))
-        titulo.grid(row=0, column=0, columnspan=3, pady=15, sticky="nsew")
+        # Título en negrita
+        titulo = ctk.CTkLabel(master=self.root, text="Funciones de " + tipo, height=32, font=("Roboto", 30, "bold"))
+        titulo.grid(row=0, column=0, columnspan=3, pady=(30, 10), sticky="nsew")  # Aumenta el padding superior
 
+        # Logo
         logo = ctk.CTkImage(
             light_image=Image.open(os.path.join(carpeta_imagenes, "logo.png")),
             dark_image=Image.open(os.path.join(carpeta_imagenes, "logo.png")),
-            size=(200, 200)
+            size=(150, 150)  # Ajusta el tamaño del logo si es necesario
         )
         etiqueta = ctk.CTkLabel(master=self.root, image=logo, text="")
         etiqueta.grid(row=1, column=0, columnspan=3, pady=15, sticky="nsew")
 
-        self._crear_botones(tipo)
+        # Frame para contener los botones
+        self.frame_botones = ctk.CTkFrame(master=self.root)
+        self.frame_botones.grid(row=2, column=0, columnspan=3, padx=10, pady=10, sticky="nsew")
 
-        # Asegurar que el botón "Salir" esté al final con espacio adicional
-        self.root.grid_rowconfigure(10, weight=1)
+        self._crear_botones(tipo)
 
         self.root.mainloop()
 
@@ -218,33 +246,35 @@ class Opciones:
             "Principal": funciones_botones_administrador
         }.get(tipo, [])
 
-        # Crear botones de funciones, ajustando en una cuadrícula de 3 columnas
+        # Crear botones
         for contador, (texto_boton, funcion) in enumerate(zip(botones, funciones)):
             button = ctk.CTkButton(
-                master=self.root,
+                master=self.frame_botones,
                 text=texto_boton,
-                height=40,
-                width=200,
-                command=lambda f=funcion: [self.root.destroy(), f()]  # Cierra la ventana actual y luego ejecuta la función
+                height=50,  # Altura fija
+                width=120,  # Ancho fijo
+                command=lambda f=funcion: [self.root.destroy(), f()],
+                font=("Arial", 12, "bold")  # Botones en negrita
             )
-            row = 2 + (contador // 3)  # Organiza en filas de 3 botones
-            column = contador % 3       # Asegura que haya 3 columnas
+            row = contador // 3
+            column = contador % 3
             button.grid(row=row, column=column, padx=10, pady=10, sticky="nsew")
-            self.root.grid_columnconfigure(column, weight=1)
 
-        # Crear el botón "Salir" para volver al login, poniéndolo en la última fila
+            # Configurar la columna para que tenga el mismo peso
+            self.frame_botones.grid_columnconfigure(column, weight=1)
+
+        # Botón Salir
         salir_button = ctk.CTkButton(
-            master=self.root,
+            master=self.frame_botones,
             text="Salir",
-            height=40,
-            width=200,
-            command=self.volver_al_login  # Llama a la función que regresa al login
+            height=50,  # Altura fija
+            width=120,  # Ancho fijo
+            command=self.volver_al_login,
+            font=("Arial", 12, "bold")  # Botón Salir en negrita
         )
-        # Ubicar el botón "Salir" en una fila separada, centrado
-        salir_row = 10  # Ponerlo en la fila 10 para evitar que se sobreponga
-        salir_button.grid(row=salir_row, column=1, padx=10, pady=20, sticky="nsew")  # Columna central (1)
+        salir_button.grid(row=row + 1, column=1, padx=10, pady=(20, 10), sticky="nsew")
 
     def volver_al_login(self):
         proyecto.hora_salida_usuario()
-        self.root.destroy()  # Cierra la ventana actual
-        Login()  # Vuelve a abrir la ventana de login
+        self.root.destroy()
+        Login()

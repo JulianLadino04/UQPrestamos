@@ -19,7 +19,6 @@ import logica.table_periodo as periodos
 import logica.table_municipio as municipio
 import logica.consultas_multitabla as consulta_multitabla
 
-
 # Variables globales
 usuario_sistema = []
 id_usuario_sesion = ""
@@ -141,6 +140,10 @@ def editar_solicitud(id_empleado, id_solicitud, monto, periodo):
 def eliminar_solicitud(elementos):
     identificacion = elementos[0]
     solicitudes.eliminar_solicitud(identificacion)
+
+def eliminar_pago(elementos):
+    id_pago = elementos[0]
+    pagos.eliminar_pago(id_pago)
 
 # Funciones de préstamos
 def crear_prestamo(fecha_solicitud, empleado_id, monto, periodo):

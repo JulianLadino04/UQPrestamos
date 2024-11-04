@@ -193,7 +193,6 @@ def mostrarPrestamos():
         print(x)
 
 def read_prestamos(id_empleado):
-
     if not id_empleado:
         print("Error: id_empleado está vacío. No se puede ejecutar la consulta.")
         return []
@@ -202,24 +201,21 @@ def read_prestamos(id_empleado):
     
     try:
         with connection.cursor() as cursor:
-            sql = "SELECT * FROM PRESTAMO WHERE EMPLEADO_ID = :1 "
+            sql = "SELECT * FROM PRESTAMO WHERE EMPLEADO_ID = :1"
             print(f"Ejecutando SQL: {sql} con id_empleado = {id_empleado}")
             
             cursor.execute(sql, (id_empleado,))
             prestamos = cursor.fetchall()
             print(f"Préstamos obtenidos: {prestamos}")
 
-            # Modificar la conversión para que retorne solo el ID del préstamo
-            prestamos_lista = [prestamo[0] for prestamo in prestamos]  # Solo el primer campo (ID del préstamo)
-            print(f"Préstamos obtenidos: {prestamos_lista}")
-
     except Exception as e:
         print(f"Error al obtener préstamos: {e}")
-        prestamos_lista = []
+        prestamos = []  # Cambiamos esto para que sea una lista vacía en caso de error
     finally:
         connection.close()
 
-    return prestamos_lista
+    return prestamos  # Devolver todos los registros
+
 
 def read_prestamos_pendientes(id_empleado):
     if not id_empleado:

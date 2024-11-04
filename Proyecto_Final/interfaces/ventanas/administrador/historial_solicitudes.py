@@ -15,22 +15,29 @@ class HistorialPrestamos:
         # Crear la ventana principal
         self.root = ctk.CTk()
         self.root.title("Historial de Préstamos")
-        self.root.geometry("900x650")
+        
+        # Tamaño y posicionamiento de la ventana
+        self.root.geometry("1000x500")
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        x = (screen_width // 2) - (1000 // 2) + 30
+        y = (screen_height // 2) - (500 // 2)
+        self.root.geometry(f"1000x500+{x}+{y}")
         self.root.resizable(False, False)
+        self.root.configure(background="#2b2b2b")
 
         # IDs de empleados disponibles
         self.empleados_ids = [str(id_empleado) for id_empleado in proyecto.enviar_id_empleados()]
 
         # Frame para los campos
         self.form_frame = ctk.CTkFrame(self.root)
-        self.form_frame.pack(pady=10, padx=20, fill="both", expand=True)
+        self.form_frame.pack(pady=10, padx=20, fill="x")
 
         # Combobox para seleccionar el ID del empleado
         self.selected_empleado_id = tk.StringVar()
         ctk.CTkLabel(self.form_frame, text="Seleccione ID Empleado", font=("Roboto", 18)).grid(row=0, column=0, padx=10, pady=10, sticky="e")
         self.empleado_combo = ctk.CTkOptionMenu(self.form_frame, variable=self.selected_empleado_id, values=self.empleados_ids, command=lambda empleado_id: self.cargar_historial(empleado_id))
         self.empleado_combo.grid(row=0, column=1, padx=10, pady=10, sticky="w")
-
 
         # Frame para mostrar el historial de préstamos
         self.table_frame = ctk.CTkFrame(self.root)
@@ -63,8 +70,13 @@ class HistorialPrestamos:
         scrollbar.pack(side="right", fill="y")
         self.tree.configure(yscroll=scrollbar.set)
 
+        # Crear un frame para el botón de salir
+        botones_frame = ctk.CTkFrame(self.root)
+        botones_frame.pack(pady=20)  # Espaciado vertical
+
         # Botón para salir
-        ctk.CTkButton(self.root, text="Salir", command=self.salir).pack(pady=20)
+        ctk.CTkButton(botones_frame, text="Salir", command=self.salir, font=("Arial", 14, "bold"), width=150).pack(pady=10)  # Espaciado interno
+
 
     def cargar_historial(self, empleado_id):
         # Limpiar la tabla antes de mostrar nuevos datos
