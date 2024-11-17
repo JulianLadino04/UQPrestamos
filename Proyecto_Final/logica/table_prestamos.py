@@ -27,6 +27,9 @@ def create_prestamo(fecha_solicitud, empleado_id, monto, periodo):
     cursor = connection.cursor()
     
     try:
+        # Convertir monto a flotante
+        monto = float(monto)  # Asegurarse de que el monto sea un número flotante
+
         # Convertir periodo a entero
         periodo = int(periodo)
 
@@ -103,7 +106,11 @@ def validar_monto(empleado_id, monto):
             'Otros': 12000000
         }
         
-        if int(monto) > limites_monto.get(tipo_empleado, 0):
+        # Convertir monto a flotante y luego a entero
+        monto_float = float(monto)
+        monto_int = int(monto_float)  # Si necesitas truncar el valor a entero
+
+        if monto_int > limites_monto.get(tipo_empleado, 0):
             raise ValueError(f"El monto solicitado excede el límite permitido para el tipo de empleado {tipo_empleado}.")
         else:
             return True

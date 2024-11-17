@@ -19,7 +19,7 @@ def get_connection():
 
 ## ------------ USUARIOS --------------- ##
 def create_usuario(identificacion, nombre, username, password, nivel):
-    connection = get_connection()  # Asumo que ya tienes este método implementado
+    connection = get_connection()  # Asume que tienes este método implementado
     cursor = connection.cursor()
     
     try:
@@ -29,22 +29,30 @@ def create_usuario(identificacion, nombre, username, password, nivel):
             print("El ID de usuario ya existe. Elija otro.")
             return
 
-        # Verificar si el username ya existe
+        # Verificar si el USERNAME ya existe
         cursor.execute("SELECT COUNT(*) FROM USUARIO WHERE USERNAME = :1", (username,))
         if cursor.fetchone()[0] > 0:
             print("El nombre de usuario ya existe. Elija otro.")
             return
         
-        sql = "INSERT INTO USUARIO (ID_USUARIO, USERNAME, PASSWORD, NIVEL, NOMBRE) VALUES (:1, :2, :3, :4, :5)"
-        cursor.execute(sql, (identificacion, username, password, nivel, nombre))  # Ahora la tupla es correcta
+        # Insertar el nuevo usuario en la tabla USUARIO
+        sql_usuario = "INSERT INTO USUARIO (ID_USUARIO, USERNAME, PASSWORD, NIVEL, NOMBRE) VALUES (:1, :2, :3, :4, :5)"
+        cursor.execute(sql_usuario, (identificacion, username, password, nivel, nombre))
+
+        # Insertar las credenciales en la tabla CREDENCIALES
+        sql_credenciales = "INSERT INTO CREDENCIALES (USERNAME, PASSWORD, USUARIO) VALUES (:1, :2, :3)"
+        cursor.execute(sql_credenciales, (username, password, identificacion))
+
+        # Confirmar ambas inserciones
         connection.commit()
-        print("Usuario creado correctamente")
+        print("Usuario y credenciales creados correctamente")
             
     except Exception as e:
-        print(f"Error al crear el usuario: {e}")
+        print(f"Error al crear el usuario y sus credenciales: {e}")
     finally:
         cursor.close()
         connection.close()
+
 
 
 def obtener_usuario(id: int):
@@ -187,20 +195,20 @@ def obtener_usuario_user(user: str, contrasena: str):
         FROM CREDENCIALES 
         WHERE USERNAME = :1
         """
-        cursor.execute(sql, (user,))  # Asegúrate de que esto sea una tupla
+        cursor.execute(sql, (user,))
 
         # Obtener la fila completa de resultados
         fila = cursor.fetchone()
 
         if fila is None:
-            print(f"No se encontro ningún usuario con el USERNAME {user}.")
+            print(f"No se encontró ningún usuario con el USERNAME {user}.")
             return None
 
         # Desempaquetar los resultados
-        usuario, password, id_usuario = fila
+        username_db, password_db, id_usuario = fila
 
-        # Verificar las credenciales
-        if usuario == user and contrasena == password:
+        # Verificar las credenciales (puedes agregar un hash aquí si es necesario)
+        if username_db == user and contrasena == password_db:
             print(f"Se encontró el usuario con el USERNAME {user}.")
             return id_usuario
         else:
@@ -209,44 +217,96 @@ def obtener_usuario_user(user: str, contrasena: str):
 
     except Exception as e:
         print(f"Ocurrió un error al buscar el usuario: {str(e)}")
+        return None  # Retorna None en caso de error
 
     finally:
         cursor.close()
         connection.close()
+
 
     
 # Función para actualizar un usuario en la base de datos
-def update_usuario(user_id, username, password, nivel, nombre):
-    # Asegúrate de que el nivel sea válido antes de proceder
-    niveles = ["Tesoreria", "Empleado", "Principal"]  # Asegúrate de definir todos los niveles válidos
-    if nivel not in niveles:
-        print("Nivel no válido")
-        return  # Salimos de la función si el nivel no es válido
-
-    # Realiza la conexión a la base de datos
+def update_usuario(user_id, nuevo_username=None, nuevo_password=None, nuevo_nivel=None, nuevo_nombre=None):
     connection = get_connection()
     cursor = connection.cursor()
+    
     try:
-        # Consulta SQL para actualizar el usuario
-        sql = """
-        UPDATE USUARIO 
-        SET USERNAME = :1, PASSWORD = :2, NIVEL = :3, NOMBRE = :4
-        WHERE ID_USUARIO = :5
-        """
-        # Ejecuta la consulta con los valores proporcionados
-        cursor.execute(sql, (username, password, nivel, nombre, user_id))
+        # Construimos dinámicamente la consulta SQL
+        sql = "UPDATE USUARIO SET "
+        updates = []
+        params = []
+
+        # Actualizar username si se proporciona
+        if nuevo_username:
+            updates.append("USERNAME = :1")
+            params.append(nuevo_username)
+
+        # Actualizar password si se proporciona
+        if nuevo_password:
+            updates.append("PASSWORD = :2")
+            params.append(nuevo_password)
+
+        # Validar y actualizar el nivel si se proporciona
+        if nuevo_nivel:
+            niveles_validos = ["Tesoreria", "Empleado", "Principal"]
+            if nuevo_nivel not in niveles_validos:
+                print("Nivel no válido. Debe ser uno de los siguientes:", niveles_validos)
+                return
+            updates.append("NIVEL = :3")
+            params.append(nuevo_nivel)
+
+        # Actualizar nombre si se proporciona
+        if nuevo_nombre:
+            updates.append("NOMBRE = :4")
+            params.append(nuevo_nombre)
+
+        # Asegurarse de que se ha especificado al menos un campo para actualizar
+        if not updates:
+            print("No se especificó ningún campo para actualizar.")
+            return
         
-        # Confirma los cambios
+        # Agregar la condición WHERE a la consulta
+        sql += ", ".join(updates) + " WHERE ID_USUARIO = :5"
+        params.append(user_id)
+
+        # Ejecutar la consulta con los parámetros
+        cursor.execute(sql, params)
+        
+        # Actualizar las credenciales en la tabla CREDENCIALES
+        # Solo si se cambia el username o password
+        if nuevo_username or nuevo_password:
+            # Verificamos si ya existen credenciales para el usuario
+            cursor.execute("SELECT COUNT(*) FROM CREDENCIALES WHERE USUARIO = :1", (user_id,))
+            if cursor.fetchone()[0] > 0:
+                # Actualizar las credenciales existentes
+                sql_credenciales_update = """
+                UPDATE CREDENCIALES 
+                SET USERNAME = :1, PASSWORD = :2 
+                WHERE USUARIO = :3
+                """
+                cursor.execute(sql_credenciales_update, (nuevo_username if nuevo_username else None,
+                                                          nuevo_password if nuevo_password else None,
+                                                          user_id))
+            else:
+                # Insertar nuevas credenciales si no existen
+                sql_credenciales_insert = """
+                INSERT INTO CREDENCIALES (USERNAME, PASSWORD, USUARIO)
+                VALUES (:1, :2, :3)
+                """
+                cursor.execute(sql_credenciales_insert, (nuevo_username, nuevo_password, user_id))
+
+        # Confirmar los cambios
         connection.commit()
-        
-        print("Usuario actualizado correctamente")
+        print(f"Usuario con ID '{user_id}' actualizado correctamente.")
+    
     except Exception as e:
-        # Manejo de errores
-        print(f"Error al actualizar el usuario: {str(e)}")
+        print(f"Error al actualizar el usuario y sus credenciales: {str(e)}")
+    
     finally:
-        # Cerrar el cursor y la conexión
         cursor.close()
         connection.close()
+
+
 
 def delete_usuario(user_id):
     connection = get_connection()

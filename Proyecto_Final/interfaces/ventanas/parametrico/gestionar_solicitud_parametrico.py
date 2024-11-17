@@ -13,10 +13,27 @@ class gestionar_solicitud_parametrico:
     def __init__(self):
         self.root = ctk.CTk()
         self.root.title("Solicitud Parametrico")
+        
+        # Tamaño de la ventana
         self.root.geometry("750x550")
-        self.root.resizable(True, True)
+        
+        # Obtener el tamaño de la pantalla
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
 
-        ctk.CTkLabel(master=self.root, text="Vista de solicitud empleado parametrico", font=("Roboto", 36)).pack(pady=15)
+        # Calcular las coordenadas para centrar la ventana
+        x = (screen_width // 2) - (750 // 2)  # Centrar en el eje X
+        y = (screen_height // 2) - (550 // 2)  # Centrar en el eje Y
+        
+        # Ajustar la geometría de la ventana
+        self.root.geometry(f"750x550+{x}+{y}")
+        
+        # No permitir redimensionar la ventana
+        self.root.resizable(False, False)
+
+        # Título de la ventana
+        title_label = ctk.CTkLabel(master=self.root, text="Solicitud Parametrico", font=("Roboto", 28, "bold"))
+        title_label.pack(pady=(20, 10))
 
         # Configurar la conexión a Oracle
         try:
@@ -32,8 +49,12 @@ class gestionar_solicitud_parametrico:
             print(f"Error de conexión o consulta: {e}")
             return
 
-        # Crear la tabla (Treeview) en la ventana
-        self.tree = ttk.Treeview(self.root, columns=columnas, show="headings", height=10)
+        # Crear un marco (frame) para contener la tabla
+        tabla_frame = ctk.CTkFrame(self.root)
+        tabla_frame.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
+
+        # Crear la tabla (Treeview) en el marco
+        self.tree = ttk.Treeview(tabla_frame, columns=columnas, show="headings", height=10)
 
         # Establecer el estilo de la tabla
         style = ttk.Style()
@@ -47,26 +68,30 @@ class gestionar_solicitud_parametrico:
         ancho_columnas = 88
         for col in columnas:
             self.tree.heading(col, text=col)
-            self.tree.column(col, anchor=tk.CENTER, width=ancho_columnas, stretch=False)
+            self.tree.column(col, anchor=tk.CENTER, width=ancho_columnas, stretch=True)
 
         # Insertar los datos en la tabla
         for fila in filas:
             self.tree.insert('', tk.END, values=fila)
 
-        # Empaquetar la tabla
-        self.tree.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
+        # Empaquetar la tabla con expansión
+        self.tree.pack(pady=10, padx=10, fill=tk.BOTH, expand=True)
 
-        # Crear un marco (frame) para organizar los botones en fila
+        # Marco para los botones
         botones_frame = ctk.CTkFrame(self.root)
-        botones_frame.pack(pady=10)
-        
-        # Ajuste: Asignar diferentes posiciones en la cuadrícula para cada botón
-        ctk.CTkButton(botones_frame, text="Aprobar", command=self.aprobar_solicitud).grid(row=0, column=0, padx=10)
-        ctk.CTkButton(botones_frame, text="Reprobar", command=self.reaprobar_solicitud).grid(row=0, column=1, padx=10)
-        ctk.CTkButton(botones_frame, text="Editar Solicitud", command=self.enviar_solicitud).grid(row=0, column=2, padx=10)
-        ctk.CTkButton(botones_frame, text="Eliminar Solicitud", command=self.eliminar_solicitud).grid(row=0, column=3, padx=10)
-        ctk.CTkButton(botones_frame, text="Crear Solicitud", command=self.ventana_creacion).grid(row=0, column=4, padx=10)
-        ctk.CTkButton(self.root, text="Ir a Opciones", command=self.ir_a_opciones).pack(pady=10)
+        botones_frame.pack(pady=(10, 20))
+
+        # Botones de acción
+        ctk.CTkButton(botones_frame, text="Aprobar", command=self.aprobar_solicitud, font=("Arial", 14, "bold"), width=150).grid(row=0, column=0, padx=10)
+        ctk.CTkButton(botones_frame, text="Reprobar", command=self.reaprobar_solicitud, font=("Arial", 14, "bold"), width=150).grid(row=0, column=1, padx=10)
+        ctk.CTkButton(botones_frame, text="Editar Solicitud", command=self.enviar_solicitud, font=("Arial", 14, "bold"), width=150).grid(row=0, column=2, padx=10)
+        ctk.CTkButton(botones_frame, text="Eliminar Solicitud", command=self.eliminar_solicitud, font=("Arial", 14, "bold"), width=150).grid(row=0, column=3, padx=10)
+        ctk.CTkButton(botones_frame, text="Crear Solicitud", command=self.ventana_creacion, font=("Arial", 14, "bold"), width=150).grid(row=0, column=4, padx=10)
+        ctk.CTkButton(self.root, text="Ir a Opciones", command=self.ir_a_opciones, font=("Arial", 14, "bold"), width=150).pack(pady=10)
+
+        # Expandir columnas en el frame de botones para un diseño más equilibrado
+        for i in range(5):
+            botones_frame.grid_columnconfigure(i, weight=1)
 
         self.root.mainloop()
 
@@ -77,8 +102,7 @@ class gestionar_solicitud_parametrico:
             if fila[5] == 'PENDIENTE':
                 print("Se va aprobar la solicitud")
                 proyecto.editar_estado_solicitud(fila[0], 'APROBADA')
-                print (fila)
-                proyecto.crear_prestamo(fila[1],fila[2],fila[3],fila[4])
+                proyecto.crear_prestamo(fila[1], fila[2], fila[3], fila[4])
                 self.root.destroy()
                 gestionar_solicitud_parametrico()
             else:
@@ -90,7 +114,6 @@ class gestionar_solicitud_parametrico:
         selected_item = self.tree.selection()
         if selected_item:
             fila = self.tree.item(selected_item)['values']
-            print(fila[5])
             if fila[5] == 'PENDIENTE':
                 print("Se va reprobar la solicitud")
                 proyecto.editar_estado_solicitud(fila[0], 'REPROBADA')
@@ -105,9 +128,8 @@ class gestionar_solicitud_parametrico:
         selected_item = self.tree.selection()
         if selected_item:
             fila = self.tree.item(selected_item)['values']
-            print(f"Fila seleccionada: {fila}")
             edt.recibir_solicitud(fila)
-            self.root.destroy() 
+            self.root.destroy()
             ingresar_ventana_edicion_solicitud = edt.EditarSolicitudParametrico()
             ingresar_ventana_edicion_solicitud.root.mainloop()
         else:
@@ -117,12 +139,11 @@ class gestionar_solicitud_parametrico:
         selected_item = self.tree.selection()
         if selected_item:
             fila = self.tree.item(selected_item)['values']
-            print(f"Fila seleccionada: {fila}")
             return fila
         else:
             print("No se ha seleccionado ninguna fila")
             return None
-        
+
     def eliminar_solicitud(self):
         fila = self.obtener_seleccion()
         if fila and fila[5] == 'PENDIENTE':
@@ -132,9 +153,8 @@ class gestionar_solicitud_parametrico:
         else:
             print("No se puede eliminar la solicitud debido a que ya fue ajustada o no se ha seleccionado ninguna fila.")
 
-            
     def ventana_creacion(self):
-        self.root.destroy() 
+        self.root.destroy()
         ingresar_ventana_creacion_solicitud = reg.CrearSolicitudParametrico()
         ingresar_ventana_creacion_solicitud.root.mainloop()    
 
@@ -143,15 +163,3 @@ class gestionar_solicitud_parametrico:
         self.root.destroy()  # Cierra la ventana de gestión de empleados
         tipo_usuario = proyecto.retornar_tipo_usuario()
         ventana_principal.Opciones(tipo_usuario) 
-        # Llama a la ventana de opciones
-    def enviar_solicitud(self):
-        selected_item = self.tree.selection()
-        if selected_item:
-            fila = self.tree.item(selected_item)['values']
-            print(f"Fila seleccionada: {fila}")
-            edt.recibir_solicitud(fila)
-            self.root.destroy() 
-            ingresar_ventana_edicion_solicitud = edt.EditarSolicitudParametrico()
-            ingresar_ventana_edicion_solicitud.root.mainloop()
-        else:
-            print("No se ha seleccionado ninguna fila")   

@@ -76,15 +76,12 @@ class gestionar_usuarios:
         botones_frame = ctk.CTkFrame(main_frame)  # Cambiar a main_frame
         botones_frame.pack(pady=10)
 
-        # Añadir los botones alineados en fila utilizando grid
-        ctk.CTkButton(botones_frame, text="Editar Usuario", command=self.editar_usuario, font=("Arial", 14, "bold"), width=150).grid(row=0, column=0, padx=10, sticky="ew")
-        ctk.CTkButton(botones_frame, text="Eliminar Usuario", command=self.eliminar_usuario, font=("Arial", 14, "bold"), width=150).grid(row=0, column=1, padx=10, sticky="ew")
-        ctk.CTkButton(botones_frame, text="Crear Usuario", command=self.ventana_creacion, font=("Arial", 14, "bold"), width=150).grid(row=0, column=2, padx=10, sticky="ew")
-        ctk.CTkButton(botones_frame, text="Ir a Opciones", command=self.ir_a_opciones, font=("Arial", 14, "bold"), width=150).grid(row=0, column=3, padx=10, sticky="ew")
+        # Aquí se deshabilitan los botones de "Editar Usuario", "Eliminar Usuario" y "Crear Usuario"
+        # Solamente se muestra el botón "Ir a Opciones"
+        ctk.CTkButton(botones_frame, text="Ir a Opciones", command=self.ir_a_opciones, font=("Arial", 14, "bold"), width=150).grid(row=0, column=0, padx=10, sticky="ew")
 
         # Hacer que los botones se expandan igualmente
-        for i in range(4):
-            botones_frame.grid_columnconfigure(i, weight=1)
+        botones_frame.grid_columnconfigure(0, weight=1)
 
         self.root.mainloop()
 

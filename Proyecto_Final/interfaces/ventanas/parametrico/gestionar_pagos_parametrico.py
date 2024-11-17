@@ -1,114 +1,109 @@
 import customtkinter as ctk
 import tkinter as tk
 from tkinter import ttk
-from interfaces.ventanas.parametrico.gestionar_solicitud_parametrico_realizar_pago import RealizarPagoParametricoPrestamo
-import interfaces.ventanas.parametrico.gestionar_solicitud_parametrico as gsp
 import logica.proyecto as proyecto
 import interfaces.GUI as ventana_principal
+from interfaces.ventanas.parametrico.gestionar_solicitud_parametrico_realizar_pago import RealizarPagoParametricoPrestamo
 
 class gestionar_pagos_parametricos:
     def __init__(self):
         self.root = ctk.CTk()
-        self.root.title("Solicitud Empleado")
-        self.root.geometry("750x550")
-        self.root.resizable(True, True)
+        self.root.title("Pagos")
 
-        # Encabezado
-        ctk.CTkLabel(master=self.root, text="Vista de pagos de Empleado", font=("Roboto", 36)).grid(row=0, column=0, columnspan=2, pady=15)
+        # Tamaño y posicionamiento de la ventana
+        self.root.geometry("1000x500")
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        x = (screen_width // 2) - (1000 // 2)
+        y = (screen_height // 2) - (500 // 2)
+        self.root.geometry(f"1000x500+{x}+{y}")
+        self.root.resizable(False, False)
+        self.root.configure(background="#2b2b2b")
 
-        # Crear variable para almacenar el préstamo seleccionado
-        self.prestamo = tk.StringVar(value="Seleccione un préstamo")
+        # Frame contenedor principal, centrado en la ventana
+        main_frame = ctk.CTkFrame(self.root, width=900, height=450, fg_color="#2b2b2b")
+        main_frame.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Obtener los préstamos del cliente
-        prestamos_cliente = proyecto.enviar_prestamos_cliente_pendientes()
-        print(f"Préstamos del cliente: {prestamos_cliente}")
+        # Título
+        title_label = ctk.CTkLabel(main_frame, text="Pagos Paramétricos del Sistema", font=("Arial", 24, "bold"), text_color="#FFFFFF")
+        title_label.pack(pady=(20, 10))
 
-        # Preparar los IDs de préstamos para el OptionMenu con la verificación mejorada
-        prestamos_cliente_str = []
-        if isinstance(prestamos_cliente, list) and all(isinstance(p, (tuple, int)) for p in prestamos_cliente):
-            prestamos_cliente_str = [str(prestamo[0] if isinstance(prestamo, tuple) else prestamo) for prestamo in prestamos_cliente]
-        else:
-            print("Error: El formato de préstamos no es el esperado.")
-        
-        # Comprobar si hay datos antes de configurar el OptionMenu
-        if not prestamos_cliente_str:
-            prestamos_cliente_str = ["No hay préstamos disponibles"]
+        # Configurar la conexión a Oracle
+        try:
+            connection = proyecto.conexion_oracle()
+            cursor = connection.cursor()
+            cursor.execute("SELECT * FROM PAGO")
 
-        # Menú desplegable para seleccionar el préstamo
-        self.option_menu = ctk.CTkOptionMenu(
-            master=self.root,
-            variable=self.prestamo,
-            values=prestamos_cliente_str,
-            command=self.cargar_pagos  # Llamada a cargar pagos cada vez que se selecciona un préstamo
-        )
-        self.option_menu.grid(row=1, column=1, padx=10, pady=10, sticky="w")
+            columnas = [desc[0] for desc in cursor.description]
+            filas = cursor.fetchall()
+            cursor.close()
+            connection.close()
+        except Exception as e:
+            print(f"Error de conexión o consulta: {e}")
+            return
 
-        # Crear la tabla (Treeview) vacía al inicio
-        self.tree = ttk.Treeview(self.root, columns=("ID_Prestamo", "Valor_Pago", "Moroso", "Numero_Cuota"), show="headings", height=10)
+        # Crear la tabla (Treeview) en la ventana
+        self.tree = ttk.Treeview(main_frame, columns=columnas, show="headings", height=15)
 
-        # Estilo de la tabla
+        # Establecer el estilo de la tabla
         style = ttk.Style()
         style.theme_use('clam')
-        style.configure("Treeview", background="#2e2e2e", foreground="#ffffff", rowheight=25, fieldbackground="#2e2e2e")
+        style.configure("Treeview",
+                        background="#2e2e2e",
+                        foreground="#ffffff",
+                        rowheight=25,
+                        fieldbackground="#2e2e2e")
+        style.map("Treeview", background=[("selected", "#4a4a4a")])
 
-        # Empaquetar la tabla vacía
-        self.tree.grid(row=2, column=0, columnspan=2, pady=20, padx=20, sticky="nsew")
+        # Crear las cabeceras de la tabla y ajustar el ancho de las columnas
+        for col in columnas:
+            self.tree.heading(col, text=col)
+            self.tree.column(col, anchor=tk.CENTER, stretch=True)
 
-        # Crear el marco para los botones
-        botones_frame = ctk.CTkFrame(self.root)
-        botones_frame.grid(row=3, column=0, columnspan=2, pady=10)
+        # Insertar los datos en la tabla
+        for fila in filas:
+            self.tree.insert('', tk.END, values=fila)
 
-        # Añadir los botones alineados en fila usando grid
-        ctk.CTkButton(botones_frame, text="Pagar Prestamo", command=self.obtener_seleccion).grid(row=0, column=0, padx=10)
-        ctk.CTkButton(self.root, text="Ir a Opciones", command=self.ir_a_opciones).grid(row=4, column=0, columnspan=2, pady=10)
+        # Empaquetar la tabla en el marco principal
+        self.tree.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
+
+        # Crear un marco para los botones
+        botones_frame = ctk.CTkFrame(main_frame, fg_color="#2b2b2b")
+        botones_frame.pack(pady=10)
+
+        # Añadir botones en fila
+        ctk.CTkButton(botones_frame, text="Eliminar Pago", command=self.eliminar_pago, font=("Arial", 14, "bold"), width=150).grid(row=0, column=0, padx=10, sticky="ew")
+        ctk.CTkButton(botones_frame, text="Ir a Opciones", command=self.ir_a_opciones, font=("Arial", 14, "bold"), width=150).grid(row=0, column=1, padx=10, sticky="ew")
+
+        # Configurar expansión equitativa de botones
+        botones_frame.grid_columnconfigure(0, weight=1)
+        botones_frame.grid_columnconfigure(1, weight=1)
 
         self.root.mainloop()
 
-    def cargar_pagos(self, selected_prestamo):
-        """Cargar los pagos asociados al préstamo seleccionado y actualizar la tabla."""
-        try:
-            # Verificar que se ha seleccionado un préstamo válido
-            if selected_prestamo == "Seleccione un préstamo" or selected_prestamo == "No hay préstamos disponibles":
-                print("No se ha seleccionado un préstamo válido.")
-                return
-
-            # Obtener los pagos para el préstamo seleccionado
-            pagos = proyecto.obtener_pagos_prestamos(selected_prestamo)
-            print(f"Pagos obtenidos para el préstamo {selected_prestamo}: {pagos}")
-
-            # Limpiar la tabla antes de insertar los nuevos datos
-            self.tree.delete(*self.tree.get_children())
-
-            # Configurar las columnas del Treeview si no se han configurado
-            columnas = ["ID_Prestamo", "Valor_Pago", "Moroso", "Numero_Cuota"]
-            for col in columnas:
-                self.tree.heading(col, text=col)
-                self.tree.column(col, anchor=tk.CENTER, width=120, stretch=False)
-
-            # Insertar los pagos obtenidos en la tabla
-            for pago in pagos:
-                self.tree.insert('', tk.END, values=pago)
-
-        except Exception as e:
-            print(f"Error al cargar los pagos para el préstamo {selected_prestamo}: {e}")
-
     def obtener_seleccion(self):
-        selected_prestamo = self.prestamo.get()
-        if selected_prestamo and selected_prestamo != "Seleccione un préstamo" and selected_prestamo != "No hay préstamos disponibles":
-            print(f"Préstamo seleccionado para pago: {selected_prestamo}")
-            # Abrir la ventana para realizar el pago y pasar el ID del préstamo seleccionado
-            self.root.destroy()
-            realizar_pago_prestamo = RealizarPagoParametricoPrestamo(selected_prestamo)
-            realizar_pago_prestamo.root.mainloop()
+        """Obtiene la fila seleccionada en la tabla."""
+        selected_item = self.tree.selection()
+        if selected_item:
+            fila = self.tree.item(selected_item)['values']
+            print(f"Fila seleccionada: {fila}")
         else:
-            print("No se ha seleccionado ningún préstamo válido")
-    
+            print("No se ha seleccionado ninguna fila")
+
+    def eliminar_pago(self):
+        """Elimina el pago seleccionado de la tabla."""
+        selected_item = self.tree.selection()
+        if selected_item:
+            fila = self.tree.item(selected_item)['values']
+            print(f"Pago seleccionado: {fila}")
+            self.root.destroy()
+            proyecto.eliminar_pago(fila)
+            gestionar_pagos_parametricos()
+        else:
+            print("No se ha seleccionado ninguna fila")
+
     def ir_a_opciones(self):
+        """Cerrar la ventana actual y abrir la ventana de opciones."""
         self.root.destroy()
         tipo_usuario = proyecto.retornar_tipo_usuario() + ""
         ventana_principal.Opciones(tipo_usuario)
-        
-    def volver_principal(self):
-        self.root.destroy()
-        ingresar_ventana_solicitud = gsp.gestionar_solicitud_parametrico()
-        ingresar_ventana_solicitud.root.mainloop()

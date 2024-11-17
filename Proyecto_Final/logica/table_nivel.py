@@ -103,7 +103,7 @@ def obtener_niveles():
     connection = get_connection()
     cursor = connection.cursor()
     try:
-        sql = "SELECT * FROM NIVEL"
+        sql = "SELECT * FROM NIVEL WHERE nombre != 'Principal'"
         cursor.execute(sql)
         records = cursor.fetchall()
         return records

@@ -1,6 +1,8 @@
 import os
 import customtkinter as ctk
 import oracledb
+import logica.proyecto as proyecto
+import interfaces.GUI as ventana_principal
 from reportlab.lib.pagesizes import landscape, legal
 from reportlab.pdfgen import canvas
 import tkinter as tk
@@ -29,6 +31,13 @@ class ver_reportes:
                       font=("Arial", 12, "bold")).grid(row=0, column=0, padx=20, pady=10)
         ctk.CTkButton(botones_frame, text="Generar Reporte Total Prestado por Sucursal", command=self.generar_reporte_total_prestado_por_sucursal, 
                       font=("Arial", 12, "bold")).grid(row=1, column=0, padx=20, pady=10)
+        ctk.CTkButton(botones_frame, text="Generar Reporte Total Prestado por Municipio",
+              command=self.generar_reporte_total_prestado_por_municipio, 
+              font=("Arial", 12, "bold")).grid(row=2, column=0, padx=20, pady=10)
+        ctk.CTkButton(botones_frame, text="Ir a opciones",
+              command=self.ir_a_opciones, 
+              font=("Arial", 12, "bold")).grid(row=3, column=0, padx=20, pady=10)
+
 
         self.root.mainloop()
 
@@ -145,6 +154,63 @@ class ver_reportes:
             print("Reporte del Total Prestado por Sucursal generado en el archivo:", pdf_file)
         except Exception as e:
             print(f"Error al generar el PDF: {e}")
+
+    def obtener_total_prestado_por_municipio(self):
+        connection = self.get_connection()
+        cursor = connection.cursor()
+        try:
+            sql = '''SELECT S.MUNICIPIO AS MUNICIPIO, SUM(PR.MONTO) AS TOTAL_PRESTADO
+                    FROM PRESTAMO PR
+                    JOIN EMPLEADO E ON PR.EMPLEADO_ID = E.ID_EMPLEADO
+                    JOIN SUCURSAL S ON E.ID_SUCURSAL = S.ID_SUCURSAL
+                    GROUP BY S.MUNICIPIO'''
+            cursor.execute(sql)
+            total_prestado = cursor.fetchall()
+            return total_prestado  # Retornar los datos del total prestado por municipio
+        except Exception as e:
+            print(f"Error al obtener el total prestado por municipio: {e}")
+        finally:
+            cursor.close()
+            connection.close()
+
+    def generar_reporte_total_prestado_por_municipio(self):
+        total_prestado = self.obtener_total_prestado_por_municipio()
+
+        if not total_prestado:
+            print("No hay datos de préstamos por municipio.")
+            return
+
+        pdf_file = os.path.join(os.path.expanduser("~"), "Documents", "reporte_total_prestado_por_municipio.pdf")
+        c = canvas.Canvas(pdf_file, pagesize=landscape(legal))  # Cambiamos a tamaño oficio y orientación horizontal
+        width, height = landscape(legal)
+
+        c.drawString(50, height - 50, "Reporte del Total Prestado por Municipio")
+        c.drawString(50, height - 70, f"{'Municipio':<30} {'Total Prestado':<20}")
+        c.drawString(50, height - 90, "-" * 50)  # Línea de separación
+
+        y_position = height - 110
+
+        for municipio in total_prestado:
+            nombre_municipio, total = municipio
+            c.drawString(50, y_position, f"{nombre_municipio:<30} {total:<20}")
+            y_position -= 20
+
+            if y_position < 50:
+                c.showPage()
+                y_position = height - 50
+
+        try:
+            c.save()
+            print("Reporte del Total Prestado por Municipio generado en el archivo:", pdf_file)
+        except Exception as e:
+            print(f"Error al generar el PDF: {e}")
+
+    def ir_a_opciones(self):
+        """Cerrar la ventana actual y abrir la ventana de opciones."""
+        self.root.destroy()
+        tipo_usuario = str(proyecto.retornar_tipo_usuario())
+        ventana_principal.Opciones(tipo_usuario)  # Llama a la ventana de opciones
+
 
 if __name__ == "__main__":
     ver_reportes()

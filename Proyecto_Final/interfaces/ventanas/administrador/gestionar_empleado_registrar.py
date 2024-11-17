@@ -61,17 +61,31 @@ class RegistrarEmpleados:
         self.salario.grid(row=2, column=1, padx=10, pady=5)
 
         # Segunda columna
-        ctk.CTkLabel(form_frame, text="Cargo", font=("Roboto", 18)).grid(row=0, column=2, padx=10, pady=5, sticky="e")
-        self.cargo = tk.StringVar()
-        ctk.CTkOptionMenu(form_frame, variable=self.cargo, values=cargos_string, width=200).grid(row=0, column=3, padx=10, pady=5)
-        
-        ctk.CTkLabel(form_frame, text="ID Sucursal", font=("Roboto", 18)).grid(row=1, column=2, padx=10, pady=5, sticky="e")
-        self.id_sucursal = tk.StringVar()
-        ctk.CTkOptionMenu(form_frame, variable=self.id_sucursal, values=ids_sucursales, width=200).grid(row=1, column=3, padx=10, pady=5)
-        
-        ctk.CTkLabel(form_frame, text="Nivel en Sistema", font=("Roboto", 18)).grid(row=2, column=2, padx=10, pady=5, sticky="e")
+        ctk.CTkLabel(form_frame, text="Nivel en Sistema", font=("Roboto", 18)).grid(row=0, column=2, padx=10, pady=5, sticky="e")
         self.nivel_sis = tk.StringVar()
-        ctk.CTkOptionMenu(form_frame, variable=self.nivel_sis, values=niveles_en_cadenas, width=200).grid(row=2, column=3, padx=10, pady=5)
+        nivel_combobox = ctk.CTkOptionMenu(
+            form_frame,
+            variable=self.nivel_sis,
+            values=niveles_en_cadenas,
+            width=200,
+            command=self.habilitar_cargo  # Evento al seleccionar un nivel
+        )
+        nivel_combobox.grid(row=0, column=3, padx=10, pady=5)
+
+        ctk.CTkLabel(form_frame, text="Cargo", font=("Roboto", 18)).grid(row=1, column=2, padx=10, pady=5, sticky="e")
+        self.cargo = tk.StringVar()
+        self.cargo_combobox = ctk.CTkOptionMenu(
+            form_frame,
+            variable=self.cargo,
+            values=cargos_string,
+            width=200,
+            state="disabled"  # Deshabilitado por defecto
+        )
+        self.cargo_combobox.grid(row=1, column=3, padx=10, pady=5)
+        
+        ctk.CTkLabel(form_frame, text="ID Sucursal", font=("Roboto", 18)).grid(row=2, column=2, padx=10, pady=5, sticky="e")
+        self.id_sucursal = tk.StringVar()
+        ctk.CTkOptionMenu(form_frame, variable=self.id_sucursal, values=ids_sucursales, width=200).grid(row=2, column=3, padx=10, pady=5)
 
         # Tercera columna
         ctk.CTkLabel(form_frame, text="Usuario", font=("Roboto", 18)).grid(row=3, column=0, padx=10, pady=5, sticky="e")
@@ -92,6 +106,15 @@ class RegistrarEmpleados:
         salir_button = ctk.CTkButton(button_frame, text="Salir", command=self.volver_principal, height=40, width=200, font=("Roboto", 18, "bold"))
         salir_button.grid(row=0, column=1, padx=10)
 
+    def habilitar_cargo(self, nivel_seleccionado):
+        """
+        Habilita o deshabilita el ComboBox de Cargo según el nivel seleccionado.
+        """
+        if nivel_seleccionado.lower() == "empleado":  # Si el nivel es 'Empleado'
+            self.cargo_combobox.configure(state="normal")
+        else:
+            self.cargo_combobox.configure(state="disabled")
+
     def volver_principal(self):
         self.root.destroy()
         gestionar_empleados()
@@ -102,18 +125,34 @@ class RegistrarEmpleados:
         cargo = self.cargo.get()
         salario = self.salario.get()
         sucursal = self.id_sucursal.get()
-        nivel = self.nivel_sis.get()
+        nivel = self.nivel_sis.get().strip()
         usuario = self.usuario.get()
         contrasena = self.contrasena.get()
 
-        if identificacion == "" or nombre == "" or cargo == "" or salario == "" or sucursal == "" or nivel == "" or usuario == "" or contrasena == "":
+        # Verificar campos obligatorios
+        if identificacion == "" or nombre == "" or salario == "" or sucursal == "" or nivel == "" or usuario == "" or contrasena == "":
             self.info_create.configure(text="Hacen falta datos por llenar", fg_color="red")
-        elif proyecto.verificar_credenciales(usuario, contrasena):
+            return
+
+        # Verificar si el cargo está vacío, pero solo si el nivel no es "Tesoreria"
+        if nivel != "Tesoreria" and cargo == "":
+            self.info_create.configure(text="Hacen falta datos por llenar en el campo 'Cargo'", fg_color="red")
+            return
+
+        # Si el nivel es Tesoreria, establecer cargo como None
+        if nivel == "Tesoreria":
+            cargo = None  # o "" dependiendo de lo que soporte tu sistema
+
+        # Verificar si el usuario ya existe
+        if proyecto.verificar_credenciales(usuario, contrasena):
             self.info_create.configure(text="El usuario ingresado ya está en uso, utilice otro", fg_color="red")
-        else:
-            proyecto.crear_empleado(identificacion, nombre, cargo, salario, sucursal, nivel, usuario, contrasena)
-            self.info_create.configure(text="Se registró correctamente", fg_color="green")  # Texto verde si el registro es exitoso
-            print(f"Registrando empleado con Identificación: {identificacion}, Nombre: {nombre}, Cargo: {cargo}, Salario: {salario}, ID Sucursal: {sucursal}")
+            return
+
+        # Registrar el empleado
+        proyecto.crear_empleado(identificacion, nombre, cargo, salario, sucursal, nivel, usuario, contrasena)
+        self.info_create.configure(text="Se registró correctamente", fg_color="green")  # Texto verde si el registro es exitoso
+        print(f"Registrando empleado con Identificación: {identificacion}, Nombre: {nombre}, Cargo: {cargo}, Salario: {salario}, ID Sucursal: {sucursal}")
+
 
 def gestionar_empleados():
     gestionar_empleados_window = ge.gestionar_empleados()

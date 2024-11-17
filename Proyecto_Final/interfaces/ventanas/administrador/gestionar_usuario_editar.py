@@ -22,7 +22,7 @@ class EditarUsuario:
         # Cálculo para centrar la ventana y desplazarla hacia la derecha
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        x = (screen_width // 2) - (700 // 2) + 120
+        x = (screen_width // 2) - (1000 // 2)
         y = (screen_height // 2) - (500 // 2)
         self.root.geometry(f"1000x500+{x}+{y}")
         self.root.resizable(False, False)

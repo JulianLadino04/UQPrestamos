@@ -175,7 +175,7 @@ funciones_botones_administrador = [gestionar_usuarios,gestionar_sucursales, gest
                                    visualizar_ingresos, ver_reportes, historial_solicitudes]
 
 funciones_botones_parametrico = [gestionar_solicitud_parametrico,
-                                 gestionar_pagos_parametrico]
+                                 gestionar_pagos]
 
 funciones_botones_empleado = [gestionar_solicitud_empleado, gestionar_pagos_empleado]
 

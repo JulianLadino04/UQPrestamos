@@ -22,6 +22,14 @@ class EditarSolicitudEmpleados:
         self.root = ctk.CTk()
         self.root.title("Editar Solicitud de Empleado")
         self.root.geometry("500x500")  # Ajustamos el tamaño de la ventana
+
+        # Centrar la ventana en la pantalla
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        x = (screen_width // 2) - (500 // 2)
+        y = (screen_height // 2) - (500 // 2)
+        self.root.geometry(f"500x500+{x}+{y}")
+        
         self.root.resizable(False, False)
 
         # Crear el frame del formulario
