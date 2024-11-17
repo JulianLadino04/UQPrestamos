@@ -6,14 +6,16 @@ import interfaces.ventanas.parametrico.gestionar_solicitud_parametrico as gsp
 
 class RealizarPagoParametricoPrestamo:
     def __init__(self, id_prestamo_seleccionado):
+        self.correo = proyecto.obtenerCorreoUsuario()  # Convertido en atributo de instancia
         self.root = ctk.CTk()
         self.root.title("Pago de préstamo")
         self.root.geometry("500x500")
         self.root.resizable(False, False)
 
         self.ultima_cuota = False  # Atributo de instancia
-        id = proyecto.enviar_usuario_sesion()# Asignar el ID del usuario directamente
+        id = proyecto.enviar_usuario_sesion()  # Asignar el ID del usuario directamente
         self.id_usuario = id[0]
+
         # Crear el frame del formulario
         form_frame = ctk.CTkFrame(self.root)
         form_frame.pack(pady=10, padx=20, fill="both", expand=True)
@@ -22,17 +24,17 @@ class RealizarPagoParametricoPrestamo:
         ctk.CTkLabel(form_frame, text="Identificación", font=("Roboto", 18)).grid(row=2, column=0, padx=10, pady=10, sticky="e")
         self.id_empleado = ctk.CTkEntry(form_frame, width=140)
         self.id_empleado.grid(row=2, column=1, padx=10, pady=10, sticky="w")
-        self.id_empleado.insert(0, str(self.id_usuario))  
+        self.id_empleado.insert(0, str(self.id_usuario))
         self.id_empleado.configure(state="disabled")
 
         # Campo para el ID del Préstamo
         ctk.CTkLabel(form_frame, text="Número de Préstamo", font=("Roboto", 18)).grid(row=3, column=0, padx=10, pady=10, sticky="e")
         self.id_prestamo = ctk.CTkEntry(form_frame, width=140)
         self.id_prestamo.grid(row=3, column=1, padx=10, pady=10, sticky="w")
-        self.id_prestamo.insert(0, str(id_prestamo_seleccionado))  
+        self.id_prestamo.insert(0, str(id_prestamo_seleccionado))
         self.id_prestamo.configure(state="disabled")
 
-        # Campo para el Número de Cuota (se llenará automáticamente)
+        # Campo para el Número de Cuota
         ctk.CTkLabel(form_frame, text="Número de Cuota", font=("Roboto", 18)).grid(row=4, column=0, padx=10, pady=10, sticky="e")
         self.numero_cuota = ctk.CTkEntry(form_frame, width=140)
         self.numero_cuota.grid(row=4, column=1, padx=10, pady=10, sticky="w")
@@ -71,7 +73,7 @@ class RealizarPagoParametricoPrestamo:
             ultimo_pago = max(pagos, key=lambda x: x[3])  # Asumiendo que x[3] es la fecha
             siguiente_cuota = ultimo_pago[3] + 1  # Asumiendo que x[3] es el número de cuota
             if siguiente_cuota >= numero_total_cuotas:
-                self.ultima_cuota = True  # Marca como última cuota
+                self.ultima_cuota = True
             else:
                 self.ultima_cuota = False
         else:
@@ -94,12 +96,12 @@ class RealizarPagoParametricoPrestamo:
 
         if self.ultima_cuota:
             # Confirmar si realmente es la última cuota antes de proceder
+            proyecto.enviar_correo(self.correo, "PAGO APROBADO", "El pago realizado fue almacenado correctamente, su préstamo fue pagado completamente")
             self.mostrar_mensaje("¡Es la Última Cuota del Préstamo!, ¡Pagada!", color="blue")
-            # Realiza el pago
             proyecto.pagar_prestamo_ultimo(self.id_prestamo.get(), self.numero_cuota.get(), self.fecha_pago.get(), monto)
             self.mostrar_mensaje("¡Última cuota pagada con éxito!", color="green")
         else:
-            # Procesar como un pago normal
+            proyecto.enviar_correo(self.correo, "PAGO APROBADO", "El pago realizado fue almacenado correctamente")
             proyecto.pagar_prestamo(self.id_prestamo.get(), self.numero_cuota.get(), self.fecha_pago.get(), monto)
             self.mostrar_mensaje("Pago realizado con éxito.", color="green")
 

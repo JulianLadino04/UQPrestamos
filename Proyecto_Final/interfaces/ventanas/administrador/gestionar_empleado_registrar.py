@@ -92,9 +92,16 @@ class RegistrarEmpleados:
         self.usuario = ctk.CTkEntry(form_frame, width=200)
         self.usuario.grid(row=3, column=1, padx=10, pady=5)
         
-        ctk.CTkLabel(form_frame, text="Contraseña", font=("Roboto", 18)).grid(row=3, column=2, padx=10, pady=5, sticky="e")
-        self.contrasena = ctk.CTkEntry(form_frame, width=200, show="*")
-        self.contrasena.grid(row=3, column=3, padx=10, pady=5)
+        ctk.CTkLabel(form_frame, text="Correo", font=("Roboto", 18)).grid(row=3, column=2, padx=10, pady=15, sticky="e")
+        self.correo = ctk.CTkEntry(form_frame, width=200)
+        self.correo.grid(row=3, column=3, padx=10, pady=15)
+        
+        
+        ctk.CTkLabel(form_frame, text="Contraseña", font=("Roboto", 18)).grid(row=4, column=0, padx=10, pady=5, sticky="e")
+        self.contrasena = ctk.CTkEntry(form_frame, width=200)  # Ocultar caracteres
+        self.contrasena.grid(row=4, column=1, padx=10, pady=5)
+
+
         
         # Botones
         button_frame = ctk.CTkFrame(main_frame, fg_color=bg_color)
@@ -127,10 +134,21 @@ class RegistrarEmpleados:
         sucursal = self.id_sucursal.get()
         nivel = self.nivel_sis.get().strip()
         usuario = self.usuario.get()
-        contrasena = self.contrasena.get()
+        contra = self.contrasena.get()
+        correo = self.correo.get()
+        
+        print(f"Identificación: {identificacion}")
+        print(f"Nombre: {nombre}")
+        print(f"Cargo: {cargo}")
+        print(f"Salario: {salario}")
+        print(f"Sucursal: {sucursal}")
+        print(f"Nivel: {nivel}")
+        print(f"Usuario: {usuario}")
+        print(f"Contraseña: {contra}")
+        print(f"Correo: {correo}")
 
         # Verificar campos obligatorios
-        if identificacion == "" or nombre == "" or salario == "" or sucursal == "" or nivel == "" or usuario == "" or contrasena == "":
+        if identificacion == "" or nombre == "" or salario == "" or sucursal == "" or nivel == "" or usuario == "" or contra == "" :
             self.info_create.configure(text="Hacen falta datos por llenar", fg_color="red")
             return
 
@@ -144,12 +162,12 @@ class RegistrarEmpleados:
             cargo = None  # o "" dependiendo de lo que soporte tu sistema
 
         # Verificar si el usuario ya existe
-        if proyecto.verificar_credenciales(usuario, contrasena):
+        if proyecto.verificar_credenciales(usuario, contra):
             self.info_create.configure(text="El usuario ingresado ya está en uso, utilice otro", fg_color="red")
             return
 
         # Registrar el empleado
-        proyecto.crear_empleado(identificacion, nombre, cargo, salario, sucursal, nivel, usuario, contrasena)
+        proyecto.crear_empleado(identificacion, nombre, cargo, salario, sucursal, nivel, usuario, contra, correo)
         self.info_create.configure(text="Se registró correctamente", fg_color="green")  # Texto verde si el registro es exitoso
         print(f"Registrando empleado con Identificación: {identificacion}, Nombre: {nombre}, Cargo: {cargo}, Salario: {salario}, ID Sucursal: {sucursal}")
 

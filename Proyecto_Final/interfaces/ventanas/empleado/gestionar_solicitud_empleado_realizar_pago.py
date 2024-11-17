@@ -6,6 +6,7 @@ import interfaces.ventanas.empleado.gestionar_solicitud_empleado as ge
 
 class RealizarPagoPrestamo:
     def __init__(self, id_prestamo_seleccionado):
+        self.correo = proyecto.obtenerCorreoUsuario()
         self.root = ctk.CTk()
         self.root.title("Realizar Pago de Préstamo")
         self.root.geometry("500x500")
@@ -102,9 +103,11 @@ class RealizarPagoPrestamo:
             return
 
         if self.ultima_cuota:
+            proyecto.enviar_correo(self.correo, "PAGO APROBADO", "El pago realizado fue almacenado correctamente, su préstamo fue pagado completamente")
             proyecto.pagar_prestamo_ultimo(self.id_prestamo.get(), self.numero_cuota.get(), self.fecha_pago.get(), monto)
             self.mostrar_mensaje("¡Última cuota pagada con éxito!", color="green")
         else:
+            proyecto.enviar_correo(self.correo, "PAGO APROBADO", "El pago realizado fue almacenado correctamente")
             proyecto.pagar_prestamo(self.id_prestamo.get(), self.numero_cuota.get(), self.fecha_pago.get(), monto)
             self.mostrar_mensaje("Pago realizado con éxito.", color="green")
 

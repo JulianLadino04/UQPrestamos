@@ -1,3 +1,6 @@
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
 import customtkinter as ctk
 import os
 import oracledb
@@ -41,7 +44,7 @@ def conexion_oracle():
     try:
         connection = oracledb.connect(
             user="SYSTEM", 
-            password="Arango2004", 
+            password="0000", 
             dsn="localhost:1521/xe"
         )
         return connection
@@ -105,8 +108,8 @@ def obtener_cargo_usuario(id_usuario):
     return empleados.obtener_cargo(id_usuario)
 
 # Funciones de empleados
-def crear_empleado(identificacion, nombre, cargo, salario, sucursal, nivel, usuario, contrasena):
-    empleados.crear_empleado(identificacion, nombre, cargo, salario, sucursal, nivel, usuario, contrasena)
+def crear_empleado(identificacion, nombre, cargo, salario, sucursal, nivel, usuario, contrasena, correo):
+    empleados.crear_empleado(identificacion, nombre, cargo, salario, sucursal, nivel, usuario, contrasena, correo)
 
 def editar_empleado(identificacion, nombre, cargo, salario, sucursal, nivel):
     empleados.actualizar_empleado(identificacion, nombre, cargo, salario, sucursal, nivel)
@@ -222,3 +225,34 @@ def pagar_prestamo(numero_prestamo, numero_pago, fecha_pago, valor):
 def pagar_prestamo_ultimo(numero_prestamo, numero_pago, fecha_pago, valor):
     pagos.registrar_pago(numero_prestamo, numero_pago, fecha_pago, valor)
     prestamos.prestamo_finalizado(numero_prestamo)
+
+def enviar_correo(destinatario, asunto, mensaje):
+        """Enviar un correo utilizando SMTP."""
+        try:
+            remitente = "barbershop.uniquindio@gmail.com"  # Cambiar por tu correo
+            contrasena = "wgrb nhbw gtli dqqa"   #Pestamo$UQ12      # Cambiar por tu contraseña
+
+            # Configuración del mensaje
+            msg = MIMEMultipart()
+            msg['From'] = remitente
+            msg['To'] = destinatario
+            msg['Subject'] = asunto
+            msg.attach(MIMEText(mensaje, 'plain'))
+
+            # Conexión al servidor SMTP
+            with smtplib.SMTP('smtp.gmail.com', 587) as server:  # Cambiar por tu servidor SMTP
+                server.starttls()
+                server.login(remitente, contrasena)
+                server.sendmail(remitente, destinatario, msg.as_string())
+                print(f"Correo enviado a {destinatario}")
+        except Exception as e:
+            print(f"Error al enviar el correo: {e}")
+            
+def obtenerCorreoUsuario():
+    global id_usuario_sesion
+    return empleados.obtenerCorreoEmpleado(id_usuario_sesion)
+
+def obtenerCorreoSolicitud(idSolicitud):
+    cedula_solicitud  = solicitudes.obtenerCedula(idSolicitud)
+    return empleados.obtenerCorreoEmpleado(cedula_solicitud)
+    

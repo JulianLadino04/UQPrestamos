@@ -7,7 +7,7 @@ def get_connection():
     try:
         connection = oracledb.connect(
             user="SYSTEM",
-            password="Arango2004",
+            password="0000",
             dsn="localhost:1521/xe"
         )
         return connection
@@ -275,3 +275,39 @@ def update_estado_solicitud(solicitud_id, estado):
     cursor.close()
     connection.close()
 
+def obtenerCedula(idSolicitud):
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+        # Obtener el ID del empleado asociado a la solicitud
+        sql_solicitud = "SELECT ID_EMPLEADO FROM SOLICITUD WHERE ID_SOLICITUD = :1"
+        cursor.execute(sql_solicitud, (idSolicitud,))
+        resultado = cursor.fetchone()
+
+        if resultado is None:
+            print(f"No se encontró la solicitud con ID {idSolicitud}.")
+            return None
+        
+        empleado_id = resultado[0]
+        
+        # Obtener la cédula del empleado
+        sql_empleado = "SELECT ID_EMPLEADO FROM EMPLEADO WHERE ID_EMPLEADO = :1"
+        cursor.execute(sql_empleado, (empleado_id,))
+        empleado = cursor.fetchone()
+
+        if empleado:
+            cedula = empleado[0]
+            print(f"La cédula del empleado con ID {empleado_id} es: {cedula}")
+            return cedula
+        else:
+            print(f"No se encontró el empleado con ID {empleado_id}.")
+            return None
+    except Exception as e:
+        print(f"Error al obtener la cédula: {e}")
+        return None
+    finally:
+        cursor.close()
+        connection.close()
+
+    

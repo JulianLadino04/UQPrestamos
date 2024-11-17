@@ -101,7 +101,9 @@ class gestionar_solicitud_parametrico:
             fila = self.tree.item(selected_item)['values']
             if fila[5] == 'PENDIENTE':
                 print("Se va aprobar la solicitud")
+                self.correo = proyecto.obtenerCorreoSolicitud(fila[0])
                 proyecto.editar_estado_solicitud(fila[0], 'APROBADA')
+                proyecto.enviar_correo(self.correo, "SOLICITUD APROBADA", "La solicitud que realizo ha sido aprobada, puede comprobar su prestamo en la seccion de PRESTAMOS")
                 proyecto.crear_prestamo(fila[1], fila[2], fila[3], fila[4])
                 self.root.destroy()
                 gestionar_solicitud_parametrico()
@@ -115,8 +117,10 @@ class gestionar_solicitud_parametrico:
         if selected_item:
             fila = self.tree.item(selected_item)['values']
             if fila[5] == 'PENDIENTE':
+                self.correo = proyecto.obtenerCorreoSolicitud(fila[0])
                 print("Se va reprobar la solicitud")
                 proyecto.editar_estado_solicitud(fila[0], 'REPROBADA')
+                proyecto.enviar_correo(self.correo, "SOLICITUD REPROBADA", "La solicitud que realizo ha sido rechazada")
                 self.root.destroy()
                 gestionar_solicitud_parametrico()
             else:

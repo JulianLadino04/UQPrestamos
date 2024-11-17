@@ -4,8 +4,8 @@ import oracledb
 def get_connection():
     try:
         connection = oracledb.connect(
-            user="SYSTEM",
-            password="Arango2004",
+            user="SYSTEM", 
+            password="0000", 
             dsn="localhost:1521/xe"
         )
         return connection
@@ -43,7 +43,7 @@ def obtener_cargo(id_usuario: str):
         cursor.close()
         connection.close()
     
-def crear_empleado(ID_EMPLEADO, nombre, cargo, salario, id_sucursal, nivel, usuario, contrasena):
+def crear_empleado(ID_EMPLEADO, nombre, cargo, salario, id_sucursal, nivel, usuario, contrasena, correo):
     connection = get_connection()
     cursor = connection.cursor()
     try:
@@ -60,9 +60,9 @@ def crear_empleado(ID_EMPLEADO, nombre, cargo, salario, id_sucursal, nivel, usua
             return
         
         # Insertar en la tabla Empleado
-        sql_empleado = '''INSERT INTO Empleado (ID_EMPLEADO, nombre, cargo, salario, id_sucursal, NIVEL_SISTEMA) 
-                          VALUES (:1, :2, :3, :4, :5, :6)'''
-        cursor.execute(sql_empleado, (ID_EMPLEADO, nombre, cargo, salario, id_sucursal, nivel))
+        sql_empleado = '''INSERT INTO Empleado (ID_EMPLEADO, nombre, cargo, salario, id_sucursal, NIVEL_SISTEMA, CORREO) 
+                  VALUES (:1, :2, :3, :4, :5, :6, :7)'''
+        cursor.execute(sql_empleado, (ID_EMPLEADO, nombre, cargo, salario, id_sucursal, nivel, correo))
         
         # Insertar en la tabla Credenciales
         sql_credenciales = '''INSERT INTO CREDENCIALES (USERNAME, PASSWORD, USUARIO) 
@@ -233,6 +233,36 @@ def obtener_id_empleados():
     except Exception as e:
         print(f"Ocurrió un error al obtener los IDs de empleados: {str(e)}")
         return []
+
+    finally:
+        cursor.close()
+        connection.close()
+
+def obtenerCorreoEmpleado(idEmpleado):
+    connection = get_connection()  # Asumiendo que esta función devuelve una conexión válida
+    cursor = connection.cursor()
+
+    try:
+        # Consulta parametrizada para evitar inyección SQL
+        cursor.execute("""
+            SELECT CORREO 
+            FROM EMPLEADO 
+            WHERE ID_EMPLEADO = :idEmpleado
+        """, {"idEmpleado": idEmpleado})
+
+        # Obtener el resultado
+        correo = cursor.fetchone()
+
+        if correo:
+            # Retorna el correo como una cadena
+            return correo[0]
+        else:
+            # Retorna None si no se encontró el empleado
+            return None
+
+    except Exception as e:
+        print(f"Ocurrió un error al obtener el correo del empleado: {str(e)}")
+        return None
 
     finally:
         cursor.close()
